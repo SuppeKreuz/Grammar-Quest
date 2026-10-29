@@ -1,7 +1,5 @@
-// Grammar Quest online leaderboard configuration.
-// Enter your Supabase project URL and PUBLISHABLE key below.
-// Never use a secret/service_role key in publicly hosted code.
+// Grammar Quest: public Supabase configuration (not a secret)
 window.GRAMMAR_QUEST_CONFIG = {
-  url: '',
-  publishableKey: ''
+  url: 'https://vrrxqckdmxdlnbpikkqh.supabase.co',
+  publishableKey: 'sb_publishable_nFs1C06rILg9fw3m3Pu5EQ_8Czrlx_B'
 };
