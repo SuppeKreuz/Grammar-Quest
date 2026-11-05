@@ -1,9 +1,9 @@
-> **Version 5.0 – Vorschau / noch NICHT veröffentlicht.** Dieser Stand liegt auf dem Branch `feature/grammar-quest-5-preview`. Die aktuelle GitHub-Pages-Website verwendet weiter `main`. Erst nach ausdrücklicher Freigabe zusammenführen.
+> **Version 5.0** – aktualisierte Grammar Quest Website mit Level-Karte, Shop, Abzeichen, neuen Aufgabentypen und verbesserter Rangliste. Die Veröffentlichung erfolgt nach Zusammenführung in `main`.
 
-## Neu in der 5.0-Vorschau
+## Neu in Grammar Quest 5.0
 
 - **Interaktive Level-Karte:** 20 anklickbare Stationen pro Klasse, unterteilt in Easy, Medium und Hard, mit gesperrten und abgeschlossenen Levels.
-- **Drei Aufgabentypen:** Word Order, Multiple Choice und Fill the Gap. Die bisherigen Satzinhalte bleiben erhalten.
+- **Drei Aufgabentypen:** Word Order, Multiple Choice und Fill the Gap. Du kannst zwischen den drei Modi oder einem gemischten Modus wechseln; die bisherigen Satzinhalte bleiben erhalten.
 - **Deutschsprachige Fehlererklärungen:** Nach falschen Antworten erscheint eine Grammatik-Erklärung; sie ist auch manuell abrufbar.
 - **Münzen und Shop:** Für neue, regulär abgeschlossene Levels und Stufen erhältst du Münzen. Damit lassen sich Maskottchen/Avatare und Spielertitel kaufen und ausrüsten.
 - **Achievements:** Acht sammelbare Abzeichen, u. a. für Serien, abgeschlossene Pfade und Shop-Käufe.
@@ -18,13 +18,13 @@
 - Das bestehende Supabase-Online-Leaderboard behält seine Tabellenstruktur; für dieses Update sind **keine Datenbankänderungen nötig**.
 - Punktmeldungen an ein öffentliches Leaderboard lassen sich ohne zusätzliche serverseitige Prüfung manipulieren. Die Admin-Konsole ist nur ein lokales Testwerkzeug, keine sichere Zugangskontrolle.
 
-### Version 5.0 lokal testen (ohne Veröffentlichung)
+### Version 5.0 lokal testen
 
-1. In GitHub den Branch `feature/grammar-quest-5-preview` auswählen und **Code → Download ZIP** verwenden.
+1. Im Repository unter **Code → Download ZIP** die Dateien herunterladen.
 2. Das ZIP entpacken und die `index.html` öffnen. Die zusätzlichen Dateien `v5.css`, `v5-design.js`, `v5-game.js`, `v5-hub.js` und `v5-weekly.js` müssen im selben Verzeichnis bleiben.
 3. Einen Spielernamen anlegen oder einen bestehenden Namen eingeben; dann einen Jahrgang und eine Schwierigkeit auswählen.
 4. Map, Shop, Badges, alternative Aufgaben, Fehlererklärungen und alle Designfarben ausprobieren.
-5. Erst nach Freigabe den Branch in `main` übernehmen. Vorher wird an GitHub Pages nichts geändert.
+5. Die Online-Version unter https://suppekreuz.github.io/Grammar-Quest/ öffnen und den eigenen Fortschritt mit einem Spitznamen fortsetzen.
 
 ---
 
