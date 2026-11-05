@@ -16,7 +16,7 @@
 - Vorhandener Spielfortschritt wird bei der ersten Nutzung für Münzen/Abzeichen berücksichtigt. Wiederholtes Absolvieren bereits gutgeschriebener Levels gibt nicht erneut Münzen.
 - Shop, Münzen, Avatare und Erfolge werden **nur im jeweiligen Browser** gespeichert und **nicht geräteübergreifend synchronisiert**.
 - Das bestehende Supabase-Online-Leaderboard behält seine Tabellenstruktur; für dieses Update sind **keine Datenbankänderungen nötig**.
-- Punktmeldungen an ein öffentliches Leaderboard lassen sich ohne zusätzliche serverseitige Prüfung manipulieren. Die Admin-Konsole ist nur ein lokales Testwerkzeug, keine sichere Zugangskontrolle.
+- Admin-Punkte werden über eine Supabase Edge Function mit Passwortprüfung serverseitig gespeichert. Dabei zählen sie in derselben Online-Rangliste wie reguläre Punkte. **Achtung:** Das Admin-Passwort ist im öffentlich einsehbaren Spielcode enthalten und bietet daher keine echte Zugriffssicherheit.
 
 ### Version 5.0 lokal testen
 
@@ -75,7 +75,7 @@ Die Spieloberfläche ist auf Englisch. **Grammatikregeln und Lerntipps sind auf 
 
 In der Online-Rangliste werden **Spielername, Klassenstufe, Punkte und Spielfortschritt** gespeichert und öffentlich angezeigt. Verwende deshalb bitte **einen Spitznamen, nicht deinen echten Namen**. Der lokale Spielstand und die Designauswahl werden im Browser gespeichert.
 
-**Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. **Über den Admin-Modus vergebene Punkte werden lokal gespeichert und in der lokalen Rangliste angezeigt, auch nach dem Neuladen.** Sie werden nicht an die öffentliche Online-Rangliste gesendet. Das ersetzt keine serverseitige Anti-Cheat-Prüfung.
+**Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. **Über den Admin-Modus vergebene Punkte werden lokal gespeichert und ab jetzt auch als normale Punkte in der öffentlichen Online-Rangliste angezeigt.** Sie werden nicht sichtbar als Testpunkte gekennzeichnet. Das ersetzt keine serverseitige Anti-Cheat-Prüfung.
 
 ## Technik
 
@@ -95,7 +95,7 @@ Lade das Repository herunter und öffne `index.html` in einem Browser. Das Spiel
 
 1. Erstelle ein GitHub-Repository mit den Dateien aus diesem Projekt.
 2. Aktiviere unter **Settings → Pages** die Veröffentlichung von `main` und `/(root)`.
-3. Lege in Supabase ein Projekt an und führe `supabase-leaderboard.sql` im **SQL Editor** aus.
+3. Lege in Supabase ein Projekt an und führe `supabase-leaderboard.sql` im **SQL Editor** aus. Bei vorhandener Datenbank führe stattdessen die zusätzlichen Änderungen aus `supabase-admin-scores-migration.sql` aus. Um Admin-Punkte online zu speichern, deploye außerdem die Edge Function aus `supabase/functions/grammar-admin-score/index.ts` mit `verify_jwt = false` (sie prüft die Passphrase selbst).
 4. Trage in `config.js` die **Projekt-URL** und ausschließlich den **Publishable Key** ein.
 5. Veröffentliche deine Änderungen und teste die Online-Rangliste mit zwei verschiedenen Browsern oder Geräten.
 
