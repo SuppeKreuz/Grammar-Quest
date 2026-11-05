@@ -75,7 +75,7 @@ Die Spieloberfläche ist auf Englisch. **Grammatikregeln und Lerntipps sind auf 
 
 In der Online-Rangliste werden **Spielername, Klassenstufe, Punkte und Spielfortschritt** gespeichert und öffentlich angezeigt. Verwende deshalb bitte **einen Spitznamen, nicht deinen echten Namen**. Der lokale Spielstand und die Designauswahl werden im Browser gespeichert.
 
-**Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. Admin-unterstützte Spielstände sollen nicht automatisch online übertragen werden, aber dies ersetzt keine serverseitige Anti-Cheat-Prüfung.
+**Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. **Über den Admin-Modus vergebene Punkte werden lokal gespeichert und in der lokalen Rangliste angezeigt, auch nach dem Neuladen.** Sie werden nicht an die öffentliche Online-Rangliste gesendet. Das ersetzt keine serverseitige Anti-Cheat-Prüfung.
 
 ## Technik
 
