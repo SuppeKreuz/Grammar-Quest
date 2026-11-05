@@ -167,9 +167,10 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
  <p class="settings-footnote">Your design and animation choices are saved in this browser. Motion respects your device’s reduced-motion setting.</p>
 </div></dialog>
 <dialog id="stageDialog" aria-labelledby="stageHeading"><div class="modal stage-modal"><div class="stage-medal" id="stageMedal">★</div><span class="eyebrow" id="stageEyebrow">STAGE CLEARED</span><h2 id="stageHeading">Easy complete!</h2><p id="stageDescription">Next stage unlocked.</p><div class="stage-reward"><span aria-hidden="true">✦</span> <span id="stageReward">600</span> XP earned</div><button type="button" class="btn green full" id="stageContinue">Start Medium →</button><button type="button" class="btn light full" data-close="stageDialog" style="margin-top:12px">Explore the map</button></div></dialog>
-<dialog id="adminDialog" aria-labelledby="adminHeading"><div class="modal"><div class="modal-head"><div><span class="eyebrow">SECRET DEVELOPER ROOM</span><h2 id="adminHeading">Admin console 🛠</h2></div><button class="close" type="button" data-close="adminDialog" aria-label="Close">×</button></div><div id="adminLock"><p>Enter the private admin code. The code is checked securely by our server and is not published in the website source.</p><label class="form-field" for="adminPassword">Passphrase</label><input type="password" id="adminPassword" class="text-input" autocomplete="off"><p id="adminError" class="errorline"></p><button type="button" class="btn purple full" id="adminLogin">Unlock admin tools</button></div><div id="adminTools" hidden><p class="admin-help">Local test controls for the current player and grade. Admin points are saved locally and can also be published as ordinary scores to the shared Online leaderboard. Press <span class="kbd">Ctrl + Shift + A</span> to open this room.</p><div class="admin-actions"><button class="btn green" data-admin="correct" type="button">✓ Auto-solve (+100)</button><button class="btn purple" data-admin="bonus" type="button">✦ Add 500 points</button><button class="btn light" data-admin="lives" type="button">♥ Restore lives</button><button class="btn light" data-admin="next" type="button">⏭ Unlock next level</button><button class="btn purple" data-admin="unlock" type="button">🔓 Unlock next stage</button><button class="btn light" data-admin="win" type="button">🏆 Complete this grade</button><button class="btn light" data-admin="clear" type="button">🧹 Clear local leaderboard</button></div><p class="admin-status" id="adminStatus" role="status"></p></div></div></dialog>
+<dialog id="adminDialog" aria-labelledby="adminHeading"><div class="modal"><div class="modal-head"><div><span class="eyebrow">SECRET DEVELOPER ROOM</span><h2 id="adminHeading">Admin console 🛠</h2></div><button class="close" type="button" data-close="adminDialog" aria-label="Close">×</button></div><div id="adminLock"><p>Enter the private admin code. The code is checked securely by our server and is not published in the website source.</p><label class="form-field" for="adminPassword">Passphrase</label><input type="password" id="adminPassword" class="text-input" autocomplete="off"><p id="adminError" class="errorline"></p><button type="button" class="btn purple full" id="adminLogin">Unlock admin tools</button></div><div id="adminTools" hidden><p class="admin-help">Local test controls for the current player and grade. Admin points are saved locally and can also be published as ordinary scores to the shared Online leaderboard. Press <span class="kbd">Ctrl + Shift + A</span> to open this room.</p><div class="admin-actions"><button class="btn green" data-admin="correct" type="button">✓ Auto-solve (+100)</button><button class="btn purple" data-admin="bonus" type="button">✦ Add 500 points</button><button class="btn light" data-admin="lives" type="button">♥ Restore lives</button><button class="btn light" data-admin="next" type="button">⏭ Unlock next level</button><button class="btn purple" data-admin="unlock" type="button">🔓 Unlock next stage</button><button class="btn light" data-admin="win" type="button">🏆 Complete this grade</button></div><p class="admin-status" id="adminStatus" role="status"></p></div></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="config.js"></script>
+<script src="v6-endless.js"></script>
 <script>
 'use strict';
 /* ------------------------------------------------------------------
@@ -265,7 +266,7 @@ function playerKey(){return String(store.name||'').toLocaleLowerCase('en-US').tr
 function ensureProfile(){const key=playerKey();if(!key)return;store.profiles[key]??={};store.profiles[key][store.grade]??=freshState();}
 function game(){ensureProfile();return store.profiles[playerKey()]?.[store.grade]||freshState();}
 function levels(){return COURSES[store.grade]}
-function lesson(){const st=game();return levels()[Math.max(0,Math.min(levels().length-1,st.level))]}
+function lesson(){const st=game();return st.level<20?levels()[Math.max(0,st.level)]:window.GrammarQuestEndless.lesson(store.grade,st.level)}
 function shuffle(ids){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}return ids;}
 function tokens(){return lesson()[1].split(' ').map((word,id)=>({word,id}));}
 function resetTiles(){selection=[];tileOrder=shuffle(tokens().map(t=>t.id));feedback=null;}
@@ -277,12 +278,12 @@ function switchGrade(grade){if(![8,9,10].includes(grade)||store.grade===grade)re
 function makeTile(id,inAnswer=false){const item=tokens()[id];const button=document.createElement('button');button.type='button';button.className='tile';button.textContent=item.word;button.setAttribute('aria-label',`${inAnswer?'Remove':'Choose'} ${item.word}`);button.disabled=game().solved||game().lives===0;button.addEventListener('click',()=>{if(inAnswer){selection=selection.filter(n=>n!==id);}else if(!selection.includes(id)){selection.push(id);}feedback=null;renderGame();sound('tap');});return button;}
 function notice(kind,text){feedback={kind,text};renderGame();}
 function updateRecords(){const st=game(),k=`${store.grade}:${playerKey()}`,old=store.records[k];const complete=st.level+(st.solved?1:0);if(!old||st.score>old.score||(st.score===old.score&&complete>old.completed)){store.records[k]={name:store.name,grade:store.grade,score:st.score,completed:complete,bestStreak:st.bestStreak,assisted:Boolean(st.assisted),updatedAt:new Date().toISOString()};}persist();}
-function correct(auto=false){const st=game();if(st.lives<=0||st.solved)return;
+function correct(auto=false){const st=game();if(st.lives<=0||st.solved)return;if(!Number.isSafeInteger(st.score)||st.score>Number.MAX_SAFE_INTEGER-100)return;
  if(auto)selection=tokens().map(t=>t.id);
  st.score+=100;st.streak++;st.bestStreak=Math.max(st.bestStreak,st.streak);st.solved=true;feedback={kind:'success',text:auto?'Admin auto-solve! +100 points.':'Amazing! That sentence is correct. +100 points!'};
- updateRecords();renderAll();pointFloat();sound('success');burstAt($('checkButton'));if(remoteReady&&!st.assisted&&[5,12].includes(st.level))postRemoteScore(true).catch(console.warn);if(STAGE_BOUNDS.some(s=>s.end===st.level)){confetti(st.level===19?65:28);if(st.level===19)setTimeout(()=>openResult(true),650);else setTimeout(showStageComplete,700);}
+ updateRecords();renderAll();pointFloat();sound('success');burstAt($('checkButton'));if(remoteReady&&!st.assisted)postRemoteScore(true).catch(console.warn);if(st.level===19){confetti(65);toast('Classic path complete! Endless Challenge is unlocked!');}else if(STAGE_BOUNDS.some(s=>s.end===st.level)){confetti(28);setTimeout(showStageComplete,700);}
 }
-function tryCheck(){const st=game();if(!store.name){profileDialog(true);return;}if(st.lives<=0){openResult(false);return;}if(st.solved){if(st.level===levels().length-1){openResult(true);return;}advanceLevel();return;}
+function tryCheck(){const st=game();if(!store.name){profileDialog(true);return;}if(st.lives<=0){openResult(false);return;}if(st.solved){advanceLevel();return;}
  const words=tokens();if(selection.length!==words.length){notice('info',`Choose all ${words.length} words before checking.`);sound('error');return;}
  const answer=selection.map(id=>words[id].word).join(' ');if(answer===lesson()[1])correct();else{st.lives--;st.streak=0;persist();if(st.lives===0){feedback={kind:'error',text:'No lives left. Keep practising and try again!'};renderAll();sound('error');setTimeout(()=>openResult(false),550);}else{resetTiles();feedback={kind:'error',text:`Not quite! You lost a life. ${st.lives} ${st.lives===1?'life':'lives'} remaining.`};renderAll();$('gameCard').classList.remove('shake');void $('gameCard').offsetWidth;$('gameCard').classList.add('shake');sound('error');}}}
 function resetSentence(){if(game().solved||game().lives<=0)return;resetTiles();renderGame();sound('tap');}
@@ -311,7 +312,7 @@ function renderLeaderboard(){if(!store.name)return;const rows=getRows(store.grad
 function renderFullBoard(){const board=$('fullLeaderboard');board.replaceChildren();document.querySelectorAll('[data-boardgrade]').forEach(b=>b.classList.toggle('active',+b.dataset.boardgrade===boardGrade));const rows=getRows(boardGrade);$('leaderDialogScope').textContent=`${leaderMode==='online'?'Online leaderboard':'Scores on this device'} · Grade ${boardGrade}`;$('onlineInfo').textContent=remoteReady?'Online scores are shared across devices. Player names are public; please use a nickname.':'Scores are saved only in this browser. Set up the optional database to enable a shared online leaderboard.';$('submitOnline').hidden=!remoteReady;if(!rows.length){const p=document.createElement('p');p.className='leader-empty';p.textContent='No scores yet. Start a challenge!';board.appendChild(p);}else rows.slice(0,100).forEach((row,i)=>board.appendChild(rankNode(row,i)));}
 function renderAll(){if(!store.name)return;$('profileName').textContent=store.name;$('avatar').textContent=store.name[0].toUpperCase();$('soundToggle').textContent=store.sound?'♫':'♪̸';$('soundToggle').title=store.sound?'Turn sounds off':'Turn sounds on';$('soundToggle').setAttribute('aria-pressed',String(store.sound));renderGame();renderLeaderboard();}
 function openResult(win){if($('resultDialog').open)return;const st=game();$('resultBadge').textContent=win?'★':'♡';$('resultBadge').style.background=win?'#e5f9e7':'#fff2ef';$('resultBadge').style.color=win?'#3db768':'#e78283';$('resultEyebrow').textContent=win?'YOU DID IT!':'KEEP GOING!';$('resultHeading').textContent=win?`Grade ${store.grade} complete!`:'Out of lives!';$('resultCopy').textContent=win?`You mastered Easy, Medium and Hard — all 20 Grade ${store.grade} challenges!`:'Even the best learners make mistakes. Give this grade another try!';$('resultScore').textContent=st.score.toLocaleString('en-US');$('resultDialog').showModal();if(remoteReady)postRemoteScore(true).catch(console.warn);}
-function restartGrade(){store.profiles[playerKey()][store.grade]=freshState();persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
+function restartGrade(){const old=game();store.profiles[playerKey()][store.grade]={...freshState(),score:old.score,bestStreak:old.bestStreak,assisted:Boolean(old.assisted)};updateRecords();persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
 function pointFloat(){if(!motionAllowed())return;const el=document.createElement('span');el.className='float-point';el.textContent='+100 XP';$('gameCard').appendChild(el);setTimeout(()=>el.remove(),1250);}
 function confetti(amount=65){if(!motionAllowed())return;const colors=['#4bc575','#8f73d9','#ffbb4e','#6bbcf0','#ef7c91'];for(let i=0;i<amount;i++){const el=document.createElement('span');el.className='confetti';el.style.left=`${Math.random()*100}vw`;el.style.background=colors[i%colors.length];el.style.animationDelay=`${Math.random()*.6}s`;el.style.setProperty('--dur',`${2.5+Math.random()*1.8}s`);el.style.setProperty('--dx',`${Math.random()*250-125}px`);el.style.setProperty('--rot',`${Math.random()*900-450}deg`);document.body.appendChild(el);setTimeout(()=>el.remove(),5100);}}
 function toast(text){const el=$('toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2500);}
@@ -337,7 +338,7 @@ async function postRemoteScore(silent=false){
   const response=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/functions/v1/grammar-admin-score`,{
    method:'POST',
    headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
-   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.max(1,Math.min(20,complete)),best_streak:Math.max(0,Math.min(20,st.bestStreak))})
+   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.max(1,complete),best_streak:Math.max(0,Math.min(20,st.bestStreak))})
   });
   if(!response.ok){const error=await response.text();throw new Error('Admin score publish failed: '+response.status+' '+error);}
   if(!silent)toast('Your score was published online!');
@@ -345,10 +346,10 @@ async function postRemoteScore(silent=false){
   await fetchRemote();
   return;
  }
- if(st.score<100||st.score>2000||st.score!==complete*100)return;
+ if(!Number.isSafeInteger(st.score)||st.score<100||st.score%100!==0)return;
  const r=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/rest/v1/grammar_scores`,{
   method:'POST',headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json','Prefer':'return=minimal'},
-  body:JSON.stringify({player_name:store.name,grade:store.grade,score:st.score,levels_completed:complete,best_streak:st.bestStreak})
+  body:JSON.stringify({player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.floor(st.score/100),best_streak:st.bestStreak})
  });
  if(!r.ok){const t=await r.text();throw new Error(`${r.status} ${t}`);}
  if(!silent)toast('Your score was published!');
@@ -358,10 +359,10 @@ function openAdmin(){$('adminError').textContent='';$('adminPassword').value='';
 function adminAction(action){if(!adminUnlocked||!store.name)return;const st=game(),scoreBefore=st.score;if(action!=='clear')st.assisted=true;let msg='';if(action==='correct'){if(st.solved){msg='This level is already solved.';}else if(st.lives<=0){msg='Restore lives first.';}else{correct(true);msg='Level auto-solved.';}}
  else if(action==='bonus'){st.score+=500;updateRecords();msg='+500 points added.';}
  else if(action==='lives'){st.lives=3;msg='All lives restored.';}
- else if(action==='next'){if(st.level<levels().length-1){st.level++;st.solved=false;resetTiles();msg='Next level unlocked.';}else msg='Already at the final level.';}
+ else if(action==='next'){if(st.level<Number.MAX_SAFE_INTEGER-2){st.level++;st.solved=false;resetTiles();msg='Next level unlocked.';}else msg='Already at the final level.';}
  else if(action==='unlock'){const next=STAGE_BOUNDS.find(s=>s.start>st.level);if(next){st.level=next.start;st.solved=false;resetTiles();msg=`${next.name} stage unlocked (admin).`;}else msg='Already at the final stage.';}
- else if(action==='win'){st.level=levels().length-1;st.solved=true;st.score=Math.max(st.score,2000);st.lives=Math.max(st.lives,1);resetTiles();selection=tokens().map(t=>t.id);updateRecords();msg='Grade marked complete!';confetti();}
- else if(action==='clear'){store.records={};msg='Local leaderboard cleared.';}
+ else if(action==='win'){st.level=Math.max(st.level,19);st.solved=true;st.score=Math.max(st.score,2000);st.lives=Math.max(st.lives,1);resetTiles();selection=tokens().map(t=>t.id);updateRecords();msg='Grade marked complete!';confetti();}
+ else if(action==='clear'){msg='Leaderboard records are protected and cannot be cleared from Admin Mode.';}
  if(st.score!==scoreBefore){updateRecords();leaderMode=remoteReady?'online':'local';msg+=' Score saved locally.';if(remoteReady)postRemoteScore(true).then(()=>toast('Admin points published to the online leaderboard!')).catch(err=>{console.warn('Could not publish admin score',err);toast('Online upload failed. Use Publish my score to retry.');});}
  persist();renderAll();$('adminStatus').textContent=msg;}
 
@@ -402,9 +403,9 @@ function renderPath(){
  });
  $('pathCount').textContent=`${STAGE_BOUNDS.filter(s=>count>s.end).length} / 3`;
  const current=STAGE_BOUNDS[Math.min(2,stageIndex(game().level))];
- $('pathFootText').textContent=count===20?'All stages complete — you are a word wizard!':`${current.name} · ${Math.min(count-current.start,current.end-current.start+1)} / ${current.end-current.start+1} challenges cleared`;
+ $('pathFootText').textContent=count===20?'All three stages complete — the endless challenge has started!':`${current.name} · ${Math.min(count-current.start,current.end-current.start+1)} / ${current.end-current.start+1} challenges cleared`;
 }
-function advanceLevel(){const st=game();if(!st.solved||st.level===19)return;st.level++;st.solved=false;persist();resetTiles();renderAll();entrance();sound('tap');}
+function advanceLevel(){const st=game();if(!st.solved||st.level>=Number.MAX_SAFE_INTEGER-2)return;st.level++;st.solved=false;persist();resetTiles();renderAll();entrance();sound('tap');}
 function entrance(){if(!motionAllowed())return;const card=$('gameCard');card.classList.remove('level-enter');void card.offsetWidth;card.classList.add('level-enter');}
 function showStageComplete(){const st=game(),stage=STAGE_BOUNDS.find(s=>s.end===st.level);if(!stage||stage.key==='hard'||!st.solved)return;
  if([...document.querySelectorAll('dialog')].some(d=>d.open)){toast(`${stage.name} completed! Next stage unlocked.`);return;}
@@ -522,17 +523,17 @@ function renderSetupStages(){
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
  const {st,count,active}=draftProgress();
- if(count===20||st.lives<=0){
-  if(!confirm('Start this grade again? Your current progress for this player and grade will be reset.'))return;
+ if(st.lives<=0){
+  if(!confirm('Restart this run with 3 lives? Your earned XP and leaderboard score will be kept.'))return;
   store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()]??={};
-  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()][draftGrade]=freshState();
+  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()][draftGrade]={...freshState(),score:st.score,bestStreak:st.bestStreak,assisted:Boolean(st.assisted)};
  }
  store.name=draftName;store.grade=draftGrade;boardGrade=draftGrade;rulesGrade=draftGrade;leaderMode=remoteReady?'online':'local';
  ensureProfile();
  // Show saved admin scores in the local leaderboard after re-entering the game.
  // Admin-assisted scores now appear on the shared online board after publishing.
  // A solved final level of an earlier stage is carried forward into the next stage.
- const current=game();if(current.solved&&current.level<19){current.level++;current.solved=false;}
+ const current=game();if(current.solved&&current.lives>0){current.level++;current.solved=false;}
  persist();resetTiles();renderAll();
  $('setupView').hidden=true;$('playView').hidden=false;
  $('playPlayer').textContent=store.name;
