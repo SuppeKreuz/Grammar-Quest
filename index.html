@@ -69,6 +69,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 @media(prefers-reduced-motion:reduce){.setup-card,.setup-screen{animation:none!important}.setup-choice{transition:none!important}}
 
 </style>
+<link rel="stylesheet" href="v5.css">
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -551,5 +552,9 @@ $('brandButton').addEventListener('click',()=>{brandClicks++;if(brandClicks>=7){
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();openAdmin();return;}if([...document.querySelectorAll('dialog')].some(d=>d.open)||$('playView').hidden)return;if(e.target instanceof HTMLElement&&['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName))return;if(e.key==='Backspace'){e.preventDefault();undo();}if(e.key==='Enter'){e.preventDefault();tryCheck();}});
 readStore();applyTheme();renderSettings();ensureProfile();resetTiles();if(store.name)renderAll();enterSetup(0);
 </script>
+<script src="v5-design.js"></script>
+<script src="v5-game.js"></script>
+<script src="v5-hub.js"></script>
+<script src="v5-weekly.js"></script>
 </body>
 </html>
