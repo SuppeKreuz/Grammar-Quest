@@ -293,7 +293,7 @@ function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson(
  document.querySelectorAll('[data-grade]').forEach(btn=>btn.setAttribute('aria-selected',String(+btn.dataset.grade===store.grade)));
  const stage=STAGE_BOUNDS[stageIndex(st.level)];$('levelBadge').textContent=st.level>=20?`∞ ENDLESS · LEVEL ${(st.level+1).toLocaleString('en-US')}`:`${stage.name.toUpperCase()} · LEVEL ${st.level-stage.start+1} / ${stage.end-stage.start+1}`;$('topicBadge').textContent=topic.name.toUpperCase();$('levelTitle').textContent=topic.name;
  $('progressText').textContent=st.level>=20?`∞ Endless · Challenge ${(st.level+1).toLocaleString('en-US')}`:`${complete} / ${count} levels`;$('progressFill').style.width=`${Math.min(100,complete/count*100)}%`;$('progressTrack').setAttribute('aria-valuenow',Math.min(20,complete));
- $('scoreValue').textContent=st.score.toLocaleString('en-US');$('livesValue').textContent='♥'.repeat(st.lives)+'♡'.repeat(3-st.lives);$('streakValue').textContent=st.streak;
+ $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=(store.records[`${store.grade}:${playerKey()}`]?.score||st.score).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(st.lives)+'♡'.repeat(3-st.lives);$('streakValue').textContent=st.streak;
  $('statsGrade').textContent=`GRADE ${store.grade}`;$('percentValue').textContent=st.level>=20?'∞ Endless Challenge — keep climbing!':`${Math.round(complete/count*100)}% complete`;
  $('wordsRemaining').textContent=`${tokens().length-selection.length} words left`;
  $('tipDescription').textContent=topic.tip;$('tipExample').textContent=topic.example;
@@ -519,8 +519,8 @@ function renderSetupStages(){
   content.append(strong,small);const tick=document.createElement('span');tick.className='choice-check';tick.textContent=locked?'🔒':'✓';b.append(emoji,content,tick);
   b.addEventListener('click',()=>{draftStage=i;b.setAttribute('aria-pressed','true');sound('tap');});container.appendChild(b);
  });
- $('setupStageNote').textContent=done?`You've finished all 20 challenges for Grade ${draftGrade}! You can replay them from the beginning.`:lost?'You have no lives remaining in this grade. Start again to try the path once more.':count?`Welcome back! Continue where you left off — level ${Math.min(20,count+1)} of 20.`:'Start with Easy. Medium and Hard unlock as you complete their levels.';
- $('setupStart').textContent=done||lost?'Play this grade again →':count?'Continue adventure →':'Start playing →';
+ $('setupStageNote').textContent=lost?'Your run has ended. Start again from 0 XP; your personal best will stay saved.':done?`Classic path complete! Continue at Endless Challenge level ${(st.level+(st.solved?2:1)).toLocaleString('en-US')}. Your personal best remains saved.`:count?`Welcome back! Continue where you left off — level ${Math.min(20,count+1)} of 20.`:'Start with Easy. Medium and Hard unlock as you complete their levels.';
+ $('setupStart').textContent=lost?'New run · 0 XP →':done?'Continue Endless Challenge →':count?'Continue adventure →':'Start playing →';
 }
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
@@ -540,14 +540,14 @@ function startFromSetup(){
  $('setupView').hidden=true;$('playView').hidden=false;
  $('playPlayer').textContent=store.name;
  const stage=STAGE_BOUNDS[stageIndex(game().level)];
- $('playJourney').textContent=`Grade ${store.grade} · ${stage.name} path · Level ${game().level+1} / 20`;
+ $('playJourney').textContent=game().level>=20?`Grade ${store.grade} · ∞ Endless · Level ${(game().level+1).toLocaleString('en-US')}`:`Grade ${store.grade} · ${stage.name} path · Level ${game().level+1} / 20`;
  if(remoteReady)fetchRemote();
  window.scrollTo({top:0,behavior:'instant'});entrance();sound('success');
 }
 function updatePlayIntro(){
  if(!store.name)return;
  $('playPlayer').textContent=store.name;
- $('playJourney').textContent=`Grade ${store.grade} · ${STAGE_BOUNDS[stageIndex(game().level)].name} path · Level ${game().level+1} / 20`;
+ $('playJourney').textContent=game().level>=20?`Grade ${store.grade} · ∞ Endless · Level ${(game().level+1).toLocaleString('en-US')}`:`Grade ${store.grade} · ${STAGE_BOUNDS[stageIndex(game().level)].name} path · Level ${game().level+1} / 20`;
 }
 $('setupNameForm').addEventListener('submit',e=>{e.preventDefault();submitSetupName();});
 $('setupBackToName').addEventListener('click',()=>setupGoTo(0));
