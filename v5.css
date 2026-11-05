@@ -1,6 +1,6 @@
 /* Grammar Quest 5.0 – preview branch only */
 :root{--v5-ink:var(--ink);--v5-panel:var(--white);--v5-accent:var(--green);--v5-on-accent:#fff}
-.v5-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.v5-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:18px 0 14px}
 .v5-toolbar-button{border:2px solid var(--surface-line,var(--line));border-radius:13px;background:var(--white);color:var(--ink);padding:9px 12px;font-size:12px;font-weight:1000;transition:transform .2s,border-color .2s;white-space:nowrap}
 .v5-toolbar-button:hover{transform:translateY(-2px);border-color:var(--accent,#3199e9)}
 .v5-wallet{font-variant-numeric:tabular-nums;background:var(--accent-pale,#e0f1ff)}
