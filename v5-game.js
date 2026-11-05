@@ -9,6 +9,8 @@ const alt=document.createElement('section');alt.id='v5AltShell';alt.className='v
 const guide=document.createElement('section');guide.id='v5Explanation';guide.className='v5-help';guide.hidden=true;e('feedback').after(guide);
 const toggle=document.createElement('div');toggle.className='v5-help-actions';const helpButton=document.createElement('button');helpButton.type='button';helpButton.textContent='💡 Erklärung anzeigen';toggle.append(helpButton);e('feedback').after(toggle);
 let activeKey='',activeMode='order',selected=-1,options=[],gapAt=1,gapWord='',helpOpen=false;
+let modePreference='mixed';
+try{const v=localStorage.getItem('grammar-quest-v5-mode');if(['mixed','order','choice','gap'].includes(v))modePreference=v;}catch(e){/* optional */}
 const variantSet={
  am:['is','are','was'],is:['are','am','was'],are:['is','was','were'],was:['were','is','are'],were:['was','are','is'],
  has:['have','had','having'],have:['has','had','having'],had:['has','have','has been'],
@@ -21,7 +23,16 @@ const variantSet={
 };
 function randomize(arr){const out=arr.slice();for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=out[i];out[i]=out[j];out[j]=t;}return out;}
 function cleanWord(word){return word.replace(/[.,!?;:]+$/,'');}
-function modeForLevel(){return ['order','choice','gap'][game().level%3];}
+function modeForLevel(){return modePreference==='mixed'?['order','choice','gap'][game().level%3]:modePreference;}
+window.GrammarQuestModes={
+ get:()=>modePreference,
+ set:function(mode){
+  if(!['mixed','order','choice','gap'].includes(mode))return;
+  modePreference=mode;activeKey='';selected=-1;helpOpen=false;resetTiles();
+  try{localStorage.setItem('grammar-quest-v5-mode',mode);}catch(e){/* optional */}
+  if(store.name)renderGame();
+ }
+};
 function buildChoice(sentence){
  const words=sentence.split(' '),results=[sentence];
  for(let i=0;i<110&&results.length<4;i++){
