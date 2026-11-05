@@ -47,7 +47,7 @@ function wallet(){
  if(!p.equipped||typeof p.equipped!=='object')p.equipped={avatar:'',title:''};
  return p;
 }
-function completed(st){return Math.max(0,Math.min(20,(Number(st.level)||0)+(st.solved?1:0)));}
+function completed(st){return Math.max(0,(Number(st.level)||0)+(st.solved?1:0));}
 function gradeState(grade){return store.profiles?.[currentKey()]?.[grade]||null;}
 function syncRewards(announce){
  const p=wallet();if(!p)return;
@@ -55,8 +55,8 @@ function syncRewards(announce){
  for(const grade of [8,9,10]){
   const st=gradeState(grade);if(!st||st.assisted)continue;
   const progress=completed(st);
-  let credited=Math.max(0,Math.min(20,Math.floor(Number(p.credited[grade])||0)));
-  for(let i=credited+1;i<=progress;i++)newCoins+=COINS_PER_LEVEL+(REWARDS[i]||0);
+  let credited=Math.max(0,Math.floor(Number(p.credited[grade])||0));
+  if(progress>credited){newCoins+=(progress-credited)*COINS_PER_LEVEL;for(const [milestone,reward] of Object.entries(REWARDS))if(+milestone>credited&&+milestone<=progress)newCoins+=reward;}
   p.credited[grade]=Math.max(credited,progress);
  }
  p.coins+=newCoins;
@@ -97,7 +97,7 @@ function openDialog(d){
  if(!store.name){toast('Choose your player name first.');return;}
  syncRewards(false);if(!d.open)d.showModal();
 }
-const mapDialog=createDialog('v5MapDialog','Your adventure map','20 challenges per grade · Easy → Medium → Hard');
+const mapDialog=createDialog('v5MapDialog','Your adventure map','20 classic levels plus endless grammar challenges');
 const shopDialog=createDialog('v5ShopDialog','Reward shop','Earn coins by completing new levels. Cosmetics do not change scores.');
 const badgeDialog=createDialog('v5BadgeDialog','Achievements & badges','Your personal collection of grammar milestones.');
 const toolbar=document.createElement('div');toolbar.className='v5-toolbar';toolbar.id='v5Toolbar';
@@ -128,7 +128,7 @@ if(onSetup){
   if(!draftName||!draftGrade){toast('Choose player and grade first.');return;}
   const oldName=store.name,oldGrade=store.grade;
   // Do not mutate the active player: preview uses a standalone informational panel.
-  const note=$h('setupStageNote');note.textContent='Grade '+draftGrade+': 6 Easy levels → 7 Medium levels → 7 Hard levels. Enter the game to explore all 20 map nodes.';
+  const note=$h('setupStageNote');note.textContent='Grade '+draftGrade+': 6 Easy → 7 Medium → 7 Hard → ∞ Endless Challenge. Your personal best is safe across new runs.';
   note.scrollIntoView({behavior:'smooth',block:'nearest'});
  });
  onSetup.querySelector('.setup-actions')?.before(mapLink);
@@ -138,11 +138,12 @@ function drawPreview(){
  const st=game(),n=completed(st);
  preview.replaceChildren();
  const top=document.createElement('div');top.className='v5-preview-top';
- const h=document.createElement('strong');h.textContent='🗺️ Grade '+store.grade+' adventure · '+n+' / 20 complete';
+ const h=document.createElement('strong');h.textContent=n>=20?'🗺️ Grade '+store.grade+' · ∞ Endless Level '+(st.level+1).toLocaleString('en-US'):'🗺️ Grade '+store.grade+' · '+n+' / 20 classic levels';
  const button=document.createElement('button');button.type='button';button.className='v5-toolbar-button';button.textContent='View full map →';button.addEventListener('click',()=>{drawMap();openDialog(mapDialog);});
  top.append(h,button);preview.appendChild(top);
  const track=document.createElement('div');track.className='v5-mini-track';
- for(let i=0;i<20;i++){
+ const start=n>=20?Math.max(20,st.level-7):0,end=n>=20?st.level+3:20;
+ for(let i=start;i<end;i++){
   const dot=document.createElement('span');dot.className='v5-mini-dot'+(i<n?' done':i===n?' current':'');dot.title='Level '+(i+1);track.appendChild(dot);
  }
  preview.appendChild(track);
@@ -152,7 +153,7 @@ function drawMap(){
  if(!store.name)return;
  const st=game(),progress=completed(st);
  const stats=document.createElement('div');stats.className='v5-map-stats';
- for(const value of ['🎓 Grade '+store.grade,'✅ '+progress+' / 20 complete','🪙 '+coinsText()+' coins']){
+ for(const value of ['🎓 Grade '+store.grade,'✅ '+(progress>=20?`${progress.toLocaleString('en-US')} challenges (∞ Endless)`:`${progress} / 20 classic levels`),'🪙 '+coinsText()+' coins']){
   const chip=document.createElement('span');chip.className='v5-chip';chip.textContent=value;stats.appendChild(chip);
  }
  body.appendChild(stats);
@@ -176,7 +177,7 @@ function drawMap(){
     if(available&&!locked){
      const go=document.createElement('button');go.type='button';go.className='v5-toolbar-button';go.style.marginLeft='10px';go.textContent='Play this level →';
      go.addEventListener('click',()=>{
-      if(st.solved&&st.level<19)advanceLevel();
+      if(st.solved)advanceLevel();
       mapDialog.close();$h('gameCard').scrollIntoView({behavior:'smooth',block:'center'});
      });detail.appendChild(go);
     }
@@ -184,6 +185,28 @@ function drawMap(){
    grid.appendChild(btn);
   }
   body.append(h,grid);
+ }
+ if(progress>=20){
+  const heading=document.createElement('h3');heading.className='v5-stage-title';heading.textContent='∞ Endless Challenge · Every level counts';
+  const grid=document.createElement('div');grid.className='v5-path-grid';
+  const start=Math.max(20,st.level-5),end=st.level+7;
+  for(let i=start;i<end;i++){
+   const complete=i<progress,available=i===progress&&st.lives>0,locked=i>progress||st.lives<=0;
+   const btn=document.createElement('button');btn.type='button';btn.className='v5-map-level'+(complete?' completed':available?' current':' locked');
+   const num=document.createElement('span');num.className='num';num.textContent=complete?'✓':locked?'🔒':String(i+1);
+   const cap=document.createElement('span');cap.className='caption';cap.textContent=window.GrammarQuestEndless.lesson(store.grade,i)[0].replace(/_/g,' ');
+   btn.append(num,cap);btn.setAttribute('aria-label','Endless level '+(i+1)+' '+(complete?'completed':locked?'locked':'available'));
+   btn.addEventListener('click',()=>{
+    detail.replaceChildren();const span=document.createElement('span');span.textContent='Level '+(i+1)+' · '+cap.textContent+' · '+(complete?'Completed':locked?'Locked':'Ready to play!');
+    detail.appendChild(span);
+    if(available){
+     const go=document.createElement('button');go.type='button';go.className='v5-toolbar-button';go.style.marginLeft='9px';go.textContent='Play →';
+     go.addEventListener('click',()=>{if(st.solved)advanceLevel();mapDialog.close();$h('gameCard').scrollIntoView({behavior:'smooth',block:'center'});});
+     detail.appendChild(go);
+    }
+   });grid.appendChild(btn);
+  }
+  body.append(heading,grid);
  }
  detail.textContent='Tap a node to see its topic. Complete challenges in order to unlock the next level.';
  body.appendChild(detail);
