@@ -256,7 +256,7 @@ const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
 const freshState=()=>({level:0,score:0,lives:3,streak:0,bestStreak:0,solved:false});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
-let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
+let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminSessionPassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
 if(remoteReady) leaderMode='online';
 function readStore(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE)||'null');if(parsed&&typeof parsed==='object'){store={...store,...parsed};if(![8,9,10].includes(+store.grade))store.grade=8;if(!store.profiles||typeof store.profiles!=='object')store.profiles={};if(!store.records||typeof store.records!=='object')store.records={};if(typeof store.motion!=='boolean')store.motion=true;if(!['presets','custom'].includes(store.designMode))store.designMode='presets';if(!Object.keys(PRESETS).includes(store.preset))store.preset='ocean';if(!store.custom||typeof store.custom!=='object')store.custom={...CUSTOM_DEFAULT};store.custom={...CUSTOM_DEFAULT,...store.custom};for(const k of ['accent','bg','surface','ink'])if(!colorValid(store.custom[k]))store.custom[k]=CUSTOM_DEFAULT[k];if(!Number.isFinite(+store.custom.radius))store.custom.radius=24;store.custom.radius=Math.max(6,Math.min(36,Math.round(+store.custom.radius)));if(!['rounded','classic','mono'].includes(store.custom.font))store.custom.font='rounded';if(!['glow','dots','grid','plain'].includes(store.custom.pattern))store.custom.pattern='glow';}}catch(err){console.warn('Local storage unavailable',err);}}
@@ -325,14 +325,18 @@ async function fetchRemote(){if(!remoteReady)return;leaderLoading=true;renderLea
 async function postRemoteScore(silent=false){
  if(!remoteReady||!store.name)return false;
  const st=game(),complete=st.level+(st.solved?1:0),assisted=Boolean(st.assisted);
- // Regular scores must match progress; admin-awarded points may exceed it.
- const validScore=Number.isSafeInteger(st.score)&&st.score>=100&&st.score<=1000000&&st.score%100===0;
+ const maxScore=assisted?100000000:2000;
+ const validScore=Number.isSafeInteger(st.score)&&st.score>=100&&st.score<=maxScore&&st.score%100===0;
  const validProgress=Number.isInteger(complete)&&complete>=0&&complete<=20;
  if(!validScore||!validProgress||(!assisted&&(complete<1||st.score!==complete*100))){if(!silent)toast('This score cannot be published yet.');return false;}
- const endpoint=ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/grammar_scores';
- const payload={player_name:store.name,grade:store.grade,score:st.score,levels_completed:complete,best_streak:st.bestStreak,assisted};
- const response=await fetch(endpoint,{method:'POST',headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});
- if(!response.ok)throw new Error('HTTP '+response.status+' '+(await response.text()));
+ // Admin scores use a server-side writer; public REST submissions retain normal score checks.
+ if(assisted&&(!adminUnlocked||!adminSessionPassphrase)){if(!silent)toast('Unlock the admin console to sync admin points.');return false;}
+ const base=ONLINE_CONFIG.url.replace(/\/$/,'');
+ const endpoint=base+(assisted?'/functions/v1/grammar-admin-score':'/rest/v1/grammar_scores');
+ const baseScore={player_name:store.name,grade:store.grade,score:st.score,levels_completed:complete,best_streak:st.bestStreak};
+ const payload=assisted?{...baseScore,passphrase:adminSessionPassphrase}:baseScore;
+ const response=await fetch(endpoint,{method:'POST',headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json',...(assisted?{}:{'Prefer':'return=minimal'})},body:JSON.stringify(payload)});
+ if(!response.ok)throw new Error('HTTP '+response.status+' '+(assisted?'Admin score upload failed.':await response.text()));
  if(!silent)toast('Your score was saved to the Online leaderboard!');
  if(leaderMode==='online')await fetchRemote();
  return true;
@@ -568,7 +572,7 @@ $('resultRetry').addEventListener('click',restartGrade);$('resultLeaderboard').a
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeDialog(b.dataset.close)));
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&!(d.id==='profileDialog'&&d.dataset.force==='true'))closeDialog(d.id);}));
 $('profileDialog').addEventListener('cancel',e=>{if($('profileDialog').dataset.force==='true')e.preventDefault();});
-$('adminLogin').addEventListener('click',()=>{if($('adminPassword').value===ADMIN_PASSPHRASE){adminUnlocked=true;$('adminLock').hidden=true;$('adminTools').hidden=false;toast('Admin tools unlocked.');}else{$('adminError').textContent='Incorrect passphrase.';}});
+$('adminLogin').addEventListener('click',()=>{if($('adminPassword').value===ADMIN_PASSPHRASE){adminUnlocked=true;adminSessionPassphrase=$('adminPassword').value;$('adminLock').hidden=true;$('adminTools').hidden=false;toast('Admin tools unlocked.');}else{$('adminError').textContent='Incorrect passphrase.';}});
 $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){$('adminLogin').click();}});
 $('adminSyncOnline').addEventListener('click',async()=>{
  if(!adminUnlocked||!store.name)return;
