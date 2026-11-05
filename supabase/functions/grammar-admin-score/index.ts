@@ -1,14 +1,13 @@
 // Grammar Quest - admin-only score writer for the shared public leaderboard.
 // No service/secret API key is ever returned to the browser.
-// The legacy client-side Admin passphrase is visible in the site's source,
-// so this gate is for casual abuse prevention, NOT high-security authentication.
+// Admin verifier is stored in a server-only RLS-protected database table.
+// No password or password hash is shipped to GitHub Pages.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "content-type, apikey, authorization, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Max-Age": "600",
 };
-const adminPasswordHash = "b8a4e3368e8e8b32fdb13b09490501363903098d5caeb1d54a7a795a26a444ce";
 
 function reply(status: number, message: string): Response {
   return new Response(JSON.stringify({ message }), {
@@ -17,12 +16,29 @@ function reply(status: number, message: string): Response {
   });
 }
 async function validAdminPassword(value: unknown): Promise<boolean> {
-  if (typeof value !== "string" || value.length > 128) return false;
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-  const expected = new Uint8Array(adminPasswordHash.match(/.{2}/g)!.map(x => Number.parseInt(x, 16)));
-  let difference = 0;
-  for (let i = 0; i < expected.length; i++) difference |= expected[i] ^ digest[i];
-  return difference === 0;
+  if (typeof value !== "string" || value.length < 12 || value.length > 128) return false;
+  const base = Deno.env.get("SUPABASE_URL");
+  const key = getServerKey();
+  if (!base || !key) return false;
+  try {
+    // Only the service role can read grammar_admin_config. No password hash in public code.
+    const headers: Record<string, string> = { apikey: key, Accept: "application/json" };
+    if (!key.startsWith("sb_secret_")) headers.Authorization = "Bearer " + key;
+    const res = await fetch(base.replace(/\/$/, "") + "/rest/v1/grammar_admin_config?select=salt,password_hash&name=eq.main&limit=1", {headers, cache:"no-store"});
+    if (!res.ok) return false;
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length !== 1) return false;
+    const { salt, password_hash } = rows[0];
+    if (typeof salt !== "string" || !/^[a-f0-9]{32}$/.test(salt) || typeof password_hash !== "string" || !/^[a-f0-9]{64}$/.test(password_hash)) return false;
+    const actual = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + ":" + value)));
+    const expected = new Uint8Array(password_hash.match(/.{2}/g)!.map((x: string) => Number.parseInt(x, 16)));
+    let difference = 0;
+    for (let i = 0; i < expected.length; i++) difference |= expected[i] ^ actual[i];
+    return difference === 0;
+  } catch (err) {
+    console.error("Admin verification service unavailable");
+    return false;
+  }
 }
 function getServerKey(): string | null {
   const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -47,6 +63,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
   if (!body || typeof body !== "object" || !(await validAdminPassword(body.passphrase))) {
     return reply(401, "Incorrect admin passphrase.");
   }
+
+  if (body.action === "verify") return reply(200, "Admin access verified.");
 
   const player_name = typeof body.player_name === "string" ? body.player_name.trim() : "";
   const grade = Number(body.grade);
