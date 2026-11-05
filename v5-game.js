@@ -68,7 +68,7 @@ function drawGuide(){
  helpButton.textContent=helpOpen?'💡 Erklärung ausblenden':'💡 Erklärung anzeigen';
 }
 function drawMode(){
- if(!store.name||e('playView').hidden)return;
+ if(!store.name)return;
  refreshChallenge();const st=game(),mode=activeMode;
  card.classList.toggle('v5-mode-alt',mode!=='order');
  label.textContent='✦ MODE: '+(mode==='order'?'WORD ORDER':mode==='choice'?'MULTIPLE CHOICE':'FILL THE GAP');
