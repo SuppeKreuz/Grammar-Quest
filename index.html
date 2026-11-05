@@ -70,6 +70,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 
 </style>
 <link rel="stylesheet" href="v5.css">
+<style>.v6-intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pb-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 10px;padding:10px 12px;border:2px solid var(--surface-line);border-radius:13px;background:var(--accent-pale);color:var(--primary-text);font-size:12px;font-weight:1000}.pb-summary strong{color:var(--accent-deep);white-space:nowrap}@media(max-width:640px){.v6-intro-actions{width:100%}.v6-intro-actions .btn{flex:1}}</style>
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -114,7 +115,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
  <div class="setup-footer"><span>✦</span> Your progress is saved on this device · <button type="button" id="setupRules">Grammatikregeln ansehen</button></div>
 </section>
 <div id="playView" hidden>
-<section class="play-intro"><div><span class="eyebrow">✦ LET'S PRACTISE!</span><h1>You're on your way, <span id="playPlayer">player</span>!</h1><p id="playJourney">Grade 8 · Easy path</p></div><button id="changeChoices" type="button" class="btn light">↶ Change choices</button></section>
+<section class="play-intro"><div><span class="eyebrow">✦ LET'S PRACTISE!</span><h1>You're on your way, <span id="playPlayer">player</span>!</h1><p id="playJourney">Grade 8 · Easy path</p></div><div class="v6-intro-actions"><button id="startNewRun" type="button" class="btn light">↻ New run · keep best</button><button id="changeChoices" type="button" class="btn light">↶ Change choices</button></div></section>
 <div id="legacyHidden" hidden>
 <section class="hero"><div class="hero-copy"><span class="eyebrow">✦ YOUR DAILY ENGLISH ADVENTURE</span><h1>Make every<br><em>word count.</em></h1><p>Build sentences, unlock challenges, and climb to the top of the leaderboard. You’ve got this!</p><span class="hero-chip">⚡ <span id="heroMode">Grade 8 · Word order</span></span></div>
  <div class="mascot-scene" aria-hidden="true"><span class="spark s1">✦</span><span class="spark s2">✳</span><span class="spark s3">✦</span><svg class="mascot" viewBox="0 0 205 190" xmlns="http://www.w3.org/2000/svg"><path d="M62 41Q34 25 33 12Q62 13 81 31M130 34Q147 10 171 15Q175 44 148 51" fill="#7dcc90" stroke="#339d63" stroke-width="5" stroke-linejoin="round"/><path d="M50 48Q99 -3 154 49Q183 79 165 136Q149 172 100 174Q47 173 34 135Q14 81 50 48" fill="#55c887" stroke="#2ba45e" stroke-width="6"/><ellipse cx="96" cy="113" rx="50" ry="48" fill="#b5f4c1"/><ellipse cx="72" cy="90" rx="13" ry="17" fill="#fff"/><ellipse cx="128" cy="90" rx="13" ry="17" fill="#fff"/><ellipse cx="75" cy="93" rx="6" ry="9" fill="#24483d"/><ellipse cx="131" cy="93" rx="6" ry="9" fill="#24483d"/><circle cx="61" cy="114" r="8" fill="#fc9b9c" opacity=".7"/><circle cx="142" cy="114" r="8" fill="#fc9b9c" opacity=".7"/><path d="M87 124Q101 141 116 124" fill="none" stroke="#27684c" stroke-width="5" stroke-linecap="round"/><path d="M52 151Q99 138 147 151L137 178Q102 170 66 179Z" fill="#8065cf" stroke="#634dad" stroke-width="4"/><path d="M100 150V176" stroke="#c6b6f5" stroke-width="3"/><path d="M32 118Q9 110 11 91M172 120Q191 109 193 88" fill="none" stroke="#2ba45e" stroke-width="9" stroke-linecap="round"/></svg></div>
@@ -403,7 +404,8 @@ function renderPath(){
    sound('tap');
   });container.appendChild(button);
  });
- $('pathCount').textContent=`${STAGE_BOUNDS.filter(s=>count>s.end).length} / 3`;
+ if(count>=20){const endless=document.createElement('button');endless.type='button';endless.className='path-step active';endless.innerHTML='<span class="path-number">∞ ENDLESS</span><span class="path-symbol" aria-hidden="true">∞</span><span class="path-name">Endless Challenge</span><span class="path-desc">New grammar levels forever · your personal best can grow</span><span class="path-cta">Continue the challenge →</span>';endless.addEventListener('click',()=>{if(game().solved)advanceLevel();$('gameCard').scrollIntoView({behavior:motionAllowed()?'smooth':'auto',block:'start'});sound('tap');});container.appendChild(endless);}
+ $('pathCount').textContent=`${STAGE_BOUNDS.filter(s=>count>s.end).length} / 3${count>=20?' + ∞':''}`;
  const current=STAGE_BOUNDS[Math.min(2,stageIndex(game().level))];
  $('pathFootText').textContent=count===20?'All three stages complete — the endless challenge has started!':`${current.name} · ${Math.min(count-current.start,current.end-current.start+1)} / ${current.end-current.start+1} challenges cleared`;
 }
@@ -578,6 +580,7 @@ document.querySelectorAll('[data-rulesgrade]').forEach(b=>b.addEventListener('cl
 document.querySelectorAll('[data-boardgrade]').forEach(b=>b.addEventListener('click',()=>{boardGrade=+b.dataset.boardgrade;renderFullBoard();}));
 $('leaderRefresh').addEventListener('click',()=>{if(leaderMode==='online')fetchRemote();else renderFullBoard();toast('Leaderboard updated.');});
 $('submitOnline').addEventListener('click',async()=>{try{await postRemoteScore();}catch(e){toast('Could not publish score. Check database setup.');console.warn(e);}});
+$('startNewRun').addEventListener('click',()=>{if(!confirm('Start a fresh run at 0 XP? Your personal best and online ranking will stay saved.'))return;restartGrade();toast('New run started. Your personal best is safe!');});
 $('resultRetry').addEventListener('click',restartGrade);$('resultLeaderboard').addEventListener('click',()=>{closeDialog('resultDialog');openBoard();});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeDialog(b.dataset.close)));
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&!(d.id==='profileDialog'&&d.dataset.force==='true'))closeDialog(d.id);}));
