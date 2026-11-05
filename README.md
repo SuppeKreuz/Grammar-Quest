@@ -1,4 +1,4 @@
-> **Version 5.0** – aktualisierte Grammar Quest Website mit Level-Karte, Shop, Abzeichen, neuen Aufgabentypen und verbesserter Rangliste. Die Veröffentlichung erfolgt nach Zusammenführung in `main`.
+> **Grammar Quest 5.0** – mit Level-Karte, Shop, Abzeichen, neuen Aufgabenarten und gemeinsamer Online-Rangliste. Auch Admin-Punkte können inzwischen in der Online-Rangliste gespeichert werden.
 
 ## Neu in Grammar Quest 5.0
 
