@@ -167,7 +167,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
  <p class="settings-footnote">Your design and animation choices are saved in this browser. Motion respects your device’s reduced-motion setting.</p>
 </div></dialog>
 <dialog id="stageDialog" aria-labelledby="stageHeading"><div class="modal stage-modal"><div class="stage-medal" id="stageMedal">★</div><span class="eyebrow" id="stageEyebrow">STAGE CLEARED</span><h2 id="stageHeading">Easy complete!</h2><p id="stageDescription">Next stage unlocked.</p><div class="stage-reward"><span aria-hidden="true">✦</span> <span id="stageReward">600</span> XP earned</div><button type="button" class="btn green full" id="stageContinue">Start Medium →</button><button type="button" class="btn light full" data-close="stageDialog" style="margin-top:12px">Explore the map</button></div></dialog>
-<dialog id="adminDialog" aria-labelledby="adminHeading"><div class="modal"><div class="modal-head"><div><span class="eyebrow">SECRET DEVELOPER ROOM</span><h2 id="adminHeading">Admin console 🛠</h2></div><button class="close" type="button" data-close="adminDialog" aria-label="Close">×</button></div><div id="adminLock"><p>Enter your admin passphrase to unlock testing and cheat controls.</p><label class="form-field" for="adminPassword">Passphrase</label><input type="password" id="adminPassword" class="text-input" autocomplete="off"><p id="adminError" class="errorline"></p><button type="button" class="btn purple full" id="adminLogin">Unlock admin tools</button></div><div id="adminTools" hidden><p class="admin-help">Local test controls for the current player and grade. Admin points are saved locally and can also be published as ordinary scores to the shared Online leaderboard. Press <span class="kbd">Ctrl + Shift + A</span> to open this room.</p><div class="admin-actions"><button class="btn green" data-admin="correct" type="button">✓ Auto-solve (+100)</button><button class="btn purple" data-admin="bonus" type="button">✦ Add 500 points</button><button class="btn light" data-admin="lives" type="button">♥ Restore lives</button><button class="btn light" data-admin="next" type="button">⏭ Unlock next level</button><button class="btn purple" data-admin="unlock" type="button">🔓 Unlock next stage</button><button class="btn light" data-admin="win" type="button">🏆 Complete this grade</button><button class="btn light" data-admin="clear" type="button">🧹 Clear local leaderboard</button></div><p class="admin-status" id="adminStatus" role="status"></p></div></div></dialog>
+<dialog id="adminDialog" aria-labelledby="adminHeading"><div class="modal"><div class="modal-head"><div><span class="eyebrow">SECRET DEVELOPER ROOM</span><h2 id="adminHeading">Admin console 🛠</h2></div><button class="close" type="button" data-close="adminDialog" aria-label="Close">×</button></div><div id="adminLock"><p>Enter the private admin code. The code is checked securely by our server and is not published in the website source.</p><label class="form-field" for="adminPassword">Passphrase</label><input type="password" id="adminPassword" class="text-input" autocomplete="off"><p id="adminError" class="errorline"></p><button type="button" class="btn purple full" id="adminLogin">Unlock admin tools</button></div><div id="adminTools" hidden><p class="admin-help">Local test controls for the current player and grade. Admin points are saved locally and can also be published as ordinary scores to the shared Online leaderboard. Press <span class="kbd">Ctrl + Shift + A</span> to open this room.</p><div class="admin-actions"><button class="btn green" data-admin="correct" type="button">✓ Auto-solve (+100)</button><button class="btn purple" data-admin="bonus" type="button">✦ Add 500 points</button><button class="btn light" data-admin="lives" type="button">♥ Restore lives</button><button class="btn light" data-admin="next" type="button">⏭ Unlock next level</button><button class="btn purple" data-admin="unlock" type="button">🔓 Unlock next stage</button><button class="btn light" data-admin="win" type="button">🏆 Complete this grade</button><button class="btn light" data-admin="clear" type="button">🧹 Clear local leaderboard</button></div><p class="admin-status" id="adminStatus" role="status"></p></div></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="config.js"></script>
 <script>
@@ -184,7 +184,7 @@ const ONLINE_CONFIG = {
 };
 /* Local-only admin convenience. This passphrase is visible in the
    page source; for real online moderation, use server-side auth. */
-const ADMIN_PASSPHRASE = 'FRANKFURT26';
+// Admin passphrases are verified remotely, never embedded in public website code.
 const TOPICS = {
  simple_present:{name:'Simple Present',tip:'Beim Simple Present steht normalerweise Subjekt + Verb + Ergänzung. Bei he, she und it bekommt das Verb meistens ein -s. Für Fragen nutzt du do oder does.',example:'She plays tennis every day.'},
  present_progressive:{name:'Present Progressive',tip:'Für Handlungen, die gerade passieren, verwendest du am/is/are + Verb mit -ing. Die richtige Reihenfolge ist Subjekt + am/is/are + -ing-Form.',example:'They are playing outside.'},
@@ -579,7 +579,32 @@ $('resultRetry').addEventListener('click',restartGrade);$('resultLeaderboard').a
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeDialog(b.dataset.close)));
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d&&!(d.id==='profileDialog'&&d.dataset.force==='true'))closeDialog(d.id);}));
 $('profileDialog').addEventListener('cancel',e=>{if($('profileDialog').dataset.force==='true')e.preventDefault();});
-$('adminLogin').addEventListener('click',()=>{if($('adminPassword').value===ADMIN_PASSPHRASE){adminUnlocked=true;adminOnlinePassphrase=$('adminPassword').value;$('adminLock').hidden=true;$('adminTools').hidden=false;toast('Admin tools unlocked.');}else{$('adminError').textContent='Incorrect passphrase.';}});
+$('adminLogin').addEventListener('click',async()=>{
+ const passphrase=$('adminPassword').value;
+ if(!remoteReady){$('adminError').textContent='Admin verification needs an internet connection.';return;}
+ if(!passphrase){$('adminError').textContent='Enter the private admin code.';return;}
+ const button=$('adminLogin');
+ button.disabled=true;
+ $('adminError').textContent='Verifying securely...';
+ try{
+  const response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
+   method:'POST',
+   headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
+   body:JSON.stringify({action:'verify',passphrase})
+  });
+  if(!response.ok){$('adminError').textContent=response.status===401?'Incorrect admin code.':'Admin verification unavailable. Try again.';return;}
+  adminUnlocked=true;
+  adminOnlinePassphrase=passphrase; // In-memory only, never localStorage.
+  $('adminPassword').value='';
+  $('adminLock').hidden=true;
+  $('adminTools').hidden=false;
+  $('adminError').textContent='';
+  toast('Admin tools unlocked.');
+ }catch(err){
+  console.warn('Admin verification unavailable:',err);
+  $('adminError').textContent='Could not contact the verification server.';
+ }finally{button.disabled=false;}
+});
 $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){$('adminLogin').click();}});
 document.querySelectorAll('[data-admin]').forEach(b=>b.addEventListener('click',()=>adminAction(b.dataset.admin)));
 $('brandButton').addEventListener('click',()=>{brandClicks++;if(brandClicks>=7){brandClicks=0;openAdmin();}});

@@ -1,4 +1,4 @@
-> **Version 5.0** – aktualisierte Grammar Quest Website mit Level-Karte, Shop, Abzeichen, neuen Aufgabentypen und verbesserter Rangliste. Die Veröffentlichung erfolgt nach Zusammenführung in `main`.
+> **Grammar Quest 5.0** – mit Level-Karte, Shop, Abzeichen, neuen Aufgabenarten, Online-Rangliste und einem serverseitig geschützten privaten Admin-Zugang.
 
 ## Neu in Grammar Quest 5.0
 
@@ -16,7 +16,7 @@
 - Vorhandener Spielfortschritt wird bei der ersten Nutzung für Münzen/Abzeichen berücksichtigt. Wiederholtes Absolvieren bereits gutgeschriebener Levels gibt nicht erneut Münzen.
 - Shop, Münzen, Avatare und Erfolge werden **nur im jeweiligen Browser** gespeichert und **nicht geräteübergreifend synchronisiert**.
 - Das bestehende Supabase-Online-Leaderboard behält seine Tabellenstruktur; für dieses Update sind **keine Datenbankänderungen nötig**.
-- Admin-Punkte werden über eine Supabase Edge Function mit Passwortprüfung serverseitig gespeichert. Dabei zählen sie in derselben Online-Rangliste wie reguläre Punkte. **Achtung:** Das Admin-Passwort ist im öffentlich einsehbaren Spielcode enthalten und bietet daher keine echte Zugriffssicherheit.
+- **Privater Admin-Code:** Die GitHub-Pages-Website enthält weder den Admin-Code noch seinen Hash. Eine Supabase Edge Function prüft ihn anhand eines nur für den Server lesbaren, gesalzenen Prüfwerts in PostgreSQL. Der vorher öffentlich sichtbare Code wurde ersetzt.
 
 ### Version 5.0 lokal testen
 
@@ -75,7 +75,14 @@ Die Spieloberfläche ist auf Englisch. **Grammatikregeln und Lerntipps sind auf 
 
 In der Online-Rangliste werden **Spielername, Klassenstufe, Punkte und Spielfortschritt** gespeichert und öffentlich angezeigt. Verwende deshalb bitte **einen Spitznamen, nicht deinen echten Namen**. Der lokale Spielstand und die Designauswahl werden im Browser gespeichert.
 
-**Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. **Über den Admin-Modus vergebene Punkte werden lokal gespeichert und ab jetzt auch als normale Punkte in der öffentlichen Online-Rangliste angezeigt.** Sie werden nicht sichtbar als Testpunkte gekennzeichnet. Das ersetzt keine serverseitige Anti-Cheat-Prüfung.
+**Hinweis zur Fairness:** Admin-Punkte werden weiterhin in derselben Online-Rangliste wie normale Punkte angezeigt. Der Admin-Zugang wird inzwischen **serverseitig anhand eines privaten Geheimnisses** geprüft; der alte, öffentlich bekannt gewordene Code funktioniert nicht mehr. Normale Spieler können die Admin-Prüftabelle nicht auslesen und keine Admin-Punkte über die öffentliche Datenbank-API hochladen. Die regulären Punktmeldungen sind ohne zusätzliche Spielprüfung weiterhin nicht vollständig fälschungssicher.
+
+
+### Privater Admin-Zugang
+
+Der Admin-Modus öffnet sich weiterhin über die bisherige Tastenkombination oder die Logo-Geste, aber die Freischaltung erfordert einen **privaten, zufällig erzeugten Code**. Die Seite sendet die Eingabe über HTTPS an die Supabase-Edge-Function mit `action: "verify"`. Erst nach erfolgreicher Serverantwort werden Admin-Werkzeuge aktiviert. Der Code wird nur für die aktuelle Sitzung im Arbeitsspeicher des Browsers gehalten und **nicht** in `localStorage` oder im GitHub-Repository abgelegt.
+
+Die Supabase-Tabelle `grammar_admin_config` enthält nur Salt und Passwortprüfwert. Row Level Security und entzogene Lese-Rechte verhindern Zugriffe für Besucher. Bitte nicht die private SQL-Anweisung mit dem echten Prüfwert in dieses Repository committen. **Ein öffentlich gewordener alter Admin-Code muss immer durch einen neuen ersetzt werden**; das bloße Löschen aus der aktuellen HTML-Datei genügt wegen der Git-Historie nicht.
 
 ## Technik
 
@@ -95,7 +102,7 @@ Lade das Repository herunter und öffne `index.html` in einem Browser. Das Spiel
 
 1. Erstelle ein GitHub-Repository mit den Dateien aus diesem Projekt.
 2. Aktiviere unter **Settings → Pages** die Veröffentlichung von `main` und `/(root)`.
-3. Lege in Supabase ein Projekt an und führe `supabase-leaderboard.sql` im **SQL Editor** aus. Bei vorhandener Datenbank führe stattdessen die zusätzlichen Änderungen aus `supabase-admin-scores-migration.sql` aus. Um Admin-Punkte online zu speichern, deploye außerdem die Edge Function aus `supabase/functions/grammar-admin-score/index.ts` mit `verify_jwt = false` (sie prüft die Passphrase selbst).
+3. Lege in Supabase ein Projekt an und führe `supabase-leaderboard.sql` im **SQL Editor** aus. Für bestehende Datenbanken steht `supabase-admin-scores-migration.sql` bereit. Erstelle außerdem die private Admin-Prüftabelle nach `migrations/private_admin_verifier.sql` und hinterlege dort **ausschließlich** einen zufällig gesalzenen SHA-256-Prüfwert – niemals den Admin-Code im öffentlichen Repo. Deploye anschließend die Edge Function aus `supabase/functions/grammar-admin-score/index.ts` mit `verify_jwt = false`; sie prüft den Code serverseitig.
 4. Trage in `config.js` die **Projekt-URL** und ausschließlich den **Publishable Key** ein.
 5. Veröffentliche deine Änderungen und teste die Online-Rangliste mit zwei verschiedenen Browsern oder Geräten.
 
