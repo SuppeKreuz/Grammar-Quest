@@ -73,9 +73,9 @@ Deno.serve(async (request: Request): Promise<Response> => {
   const best_streak = Number(body.best_streak);
   if (!/^[\p{L}\p{N}_ -]{2,20}$/u.test(player_name) ||
       ![8, 9, 10].includes(grade) ||
-      !Number.isInteger(score) || score < 100 || score > 100000000 || score % 100 !== 0 ||
-      !Number.isInteger(levels_completed) || levels_completed < 1 || levels_completed > 20 ||
-      !Number.isInteger(best_streak) || best_streak < 0 || best_streak > 20) {
+      !Number.isSafeInteger(score) || score < 100 || score > 9007199254740900 || score % 100 !== 0 ||
+      !Number.isSafeInteger(levels_completed) || levels_completed < 0 || levels_completed > 90071992547409 ||
+      !Number.isSafeInteger(best_streak) || best_streak < 0 || best_streak > 90071992547409) {
     return reply(400, "Invalid score, grade, name, or progress.");
   }
 
