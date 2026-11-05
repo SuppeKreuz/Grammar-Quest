@@ -22,7 +22,7 @@ async function fetchWeek(){
   const response=await fetch(url,{headers:{'apikey':ONLINE_CONFIG.anonKey}});
   if(!response.ok)throw new Error('HTTP '+response.status);
   weeklyRemote=(await response.json()).map(r=>({...r,name:r.player_name,completed:r.levels_completed}));
-  renderLeaderboard();
+  renderLeaderboard();renderFullBoard();
  }catch(error){console.warn('Weekly board error',error);toast('Could not load weekly scores.');}
 }
 const oldFetchRemote=fetchRemote;
@@ -32,7 +32,7 @@ weekButton.addEventListener('click',()=>{
  weekButton.classList.toggle('active',weekly);
  weekButton.setAttribute('aria-pressed',String(weekly));
  weekButton.textContent=weekly?'📅 This week ✓':'📅 Last 7 days';
- if(weekly&&leaderMode==='online')fetchWeek();else renderLeaderboard();
+ if(weekly&&leaderMode==='online')fetchWeek();else {renderLeaderboard();renderFullBoard();}
 });
 const oldRenderFull=renderFullBoard;
 renderFullBoard=function(){
