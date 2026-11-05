@@ -107,6 +107,14 @@ function barButton(label,action){
 barButton('🗺️ Level map',()=>{drawMap();openDialog(mapDialog);});
 barButton('🛍️ Shop',()=>{drawShop();openDialog(shopDialog);});
 barButton('🏅 Badges',()=>{drawBadges();openDialog(badgeDialog);});
+const modeSelect=document.createElement('select');
+modeSelect.className='v5-toolbar-button';modeSelect.setAttribute('aria-label','Challenge mode');
+for(const [value,text] of [['mixed','🎲 Mixed modes'],['order','🧩 Word order'],['choice','✅ Multiple choice'],['gap','✏️ Fill the gap']]){
+ const option=document.createElement('option');option.value=value;option.textContent=text;modeSelect.appendChild(option);
+}
+modeSelect.value=window.GrammarQuestModes?.get()||'mixed';
+modeSelect.addEventListener('change',()=>{window.GrammarQuestModes?.set(modeSelect.value);toast('Challenge mode changed. Your progress is safe.');});
+toolbar.appendChild(modeSelect);
 const walletButton=barButton('🪙 0',()=>{drawShop();openDialog(shopDialog);});
 walletButton.classList.add('v5-wallet');
 const intro=$h('playView')?.querySelector('.play-intro');
