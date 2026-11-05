@@ -28,7 +28,7 @@ applyTheme=function(){
  let accent=colorValid(raw.accent)?raw.accent:'#3199e9';
  let changed=false;
  if(contrast(surface,bg)<1.30){
-  surface=blend(bg,luminance(bg)<0.25?'#ffffff':'#111827',luminance(bg)<0.25?0.13:0.075);
+  surface=blend(bg,luminance(bg)<0.25?'#ffffff':'#111827',luminance(bg)<0.25?0.16:0.14);
   changed=true;
  }
  if(contrast(ink,surface)<4.5){
@@ -36,7 +36,8 @@ applyTheme=function(){
   changed=true;
  }
  if(contrast(accent,surface)<3){
-  accent=luminance(surface)<0.25?'#70c1ff':'#2265bd';
+  accent=luminance(surface)<0.21?'#95dfff':'#2265bd';
+  if(contrast(accent,surface)<3)accent=luminance(surface)<0.21?'#b8ecff':'#174987';
   changed=true;
  }
  const readableMuted=blend(ink,bg,0.15);
