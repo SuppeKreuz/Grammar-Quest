@@ -77,6 +77,12 @@ In der Online-Rangliste werden **Spielername, Klassenstufe, Punkte und Spielfort
 
 **Hinweis zur Fairness:** Eine öffentlich zugängliche Datenbank für Punktmeldungen ist ohne serverseitige Spielprüfung nicht vollständig gegen manipulierte Ergebnisse geschützt. Der integrierte Admin-/Testmodus ist **keine sichere Zugangskontrolle**; sein Code ist in der öffentlich einsehbaren Website enthalten. Admin-unterstützte Spielstände sollen nicht automatisch online übertragen werden, aber dies ersetzt keine serverseitige Anti-Cheat-Prüfung.
 
+## Admin-Modus auf diesem Gerät
+
+Nach der Eingabe der Admin-Passphrase bleibt die Admin-Konsole **in diesem Browser** freigeschaltet – auch nach einem Neuladen der Seite. Über **„Lock admin mode on this device“** in der Admin-Konsole kann der gespeicherte Zugriff jederzeit wieder gesperrt werden. Der Browser speichert dafür nur eine lokale Freischalt-Markierung, **nicht** das Passwort. Bereits vorhandene Spielstände und die Sperre für admin-unterstützte Online-Punktmeldungen bleiben unverändert.
+
+**Hinweis:** Dies ist eine Komfortfunktion für ein öffentliches Browser-Spiel und keine sichere Nutzeranmeldung. Auf gemeinsam genutzten Geräten solltest du den Modus nach der Nutzung wieder sperren.
+
 ## Technik
 
 Das Spiel läuft mit **HTML, CSS und JavaScript** direkt im Browser. Es benötigt für das eigentliche Spielen keinen eigenen Server.
