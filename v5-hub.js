@@ -249,10 +249,13 @@ function refreshHud(){
 }
 const baseCorrect=correct;
 correct=function(auto){
- const st=game(),before=st.solved;
+ const st=game(),before=st.solved,p=wallet(),oldCoins=p?.coins||0,oldBadges=p?.badges.length||0;
  baseCorrect(auto);
  if(!before&&st.solved&&!auto&&!st.assisted){
-  syncRewards(true);refreshHud();
+  syncRewards(false);refreshHud();
+  const gained=(p?.coins||0)-oldCoins;
+  if(gained>0)toast('+'+gained+' coins earned! 🪙');
+  if((p?.badges.length||0)>oldBadges)window.setTimeout(()=>toast('New achievement unlocked! 🏅'),600);
  }
 };
 const baseRenderAll=renderAll;
