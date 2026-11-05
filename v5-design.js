@@ -36,8 +36,8 @@ applyTheme=function(){
   changed=true;
  }
  if(contrast(accent,surface)<3){
-  accent=luminance(surface)<0.21?'#95dfff':'#2265bd';
-  if(contrast(accent,surface)<3)accent=luminance(surface)<0.21?'#b8ecff':'#174987';
+  const candidates=luminance(surface)<0.21?['#95dfff','#b8ecff','#ffffff','#112642']:['#2265bd','#174987','#112642','#f4fcff'];
+  accent=candidates.find(candidate=>contrast(candidate,surface)>=3)||'#ffffff';
   changed=true;
  }
  const readableMuted=blend(ink,bg,0.15);
