@@ -75,7 +75,21 @@ function lesson(grade,level){
  const pool=entries.filter(e=>e[1]>=minTier&&e[1]<=maxTier);
  const slot=(Math.floor(level*7+random()*pool.length))%pool.length;
  const chosen=pool[slot];
- return [chosen[0],chosen[2]()];
+ const sentence=chosen[2]();
+ const endings=[
+  '', ' in our English classroom', ' during the school project',
+  ' after the school assembly', ' before the next lesson',
+  ' for the class presentation', ' as part of our homework',
+  ' during an afternoon study session', ' with the rest of the group',
+  ' at the school library', ' in the science club',
+  ' during our weekly workshop', ' after an extra practice session',
+  ' for the upcoming examination', ' as part of a team activity',
+  ' before the final bell', ' during the language course'
+ ];
+ // More combinations reduce repeats during long runs while keeping grammar intact.
+ const ending=endings[Math.floor(random()*endings.length)];
+ const expanded=sentence.slice(0,-1)+ending+sentence.slice(-1);
+ return [chosen[0],expanded[0].toUpperCase()+expanded.slice(1)];
 }
 window.GrammarQuestEndless={lesson,firstLevels:20,version:1};
 })();
