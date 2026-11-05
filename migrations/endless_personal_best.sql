@@ -1,6 +1,8 @@
 -- Grammar Quest 6.0: endless challenges and permanent personal-best leaderboard.
 -- Safe for existing data: no rows are deleted or changed, only numeric limits expand.
 -- JavaScript safe-integer ceiling rounded down to a whole 100 XP step.
+drop policy if exists "Grammar Quest leaderboard submit" on public.grammar_scores;
+
 alter table public.grammar_scores
   drop constraint if exists grammar_scores_score_check;
 alter table public.grammar_scores
@@ -25,7 +27,6 @@ alter table public.grammar_scores
   add constraint valid_score_for_progress
     check (is_admin or score = levels_completed * 100);
 
-drop policy if exists "Grammar Quest leaderboard submit" on public.grammar_scores;
 create policy "Grammar Quest leaderboard submit"
  on public.grammar_scores for insert to anon, authenticated
  with check (
