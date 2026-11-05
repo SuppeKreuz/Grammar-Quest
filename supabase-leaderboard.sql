@@ -1,16 +1,19 @@
 -- GRAMMAR QUEST - shared leaderboard (classroom demo)
 -- Run once in Supabase > SQL Editor > New query > Run.
 -- Use nicknames only. This public submission API cannot verify actual gameplay.
+-- Assisted scores join the main leaderboard. Without server-side auth, anyone can
+-- claim assisted=true over the REST API, so this is not cheat-proof.
 
 create table if not exists public.grammar_scores (
   id bigint generated always as identity primary key,
   player_name text not null check (char_length(trim(player_name)) between 2 and 20),
   grade smallint not null check (grade in (8,9,10)),
-  score integer not null check (score between 100 and 2000 and score % 100 = 0),
-  levels_completed smallint not null check (levels_completed between 1 and 20),
+  score integer not null check (score between 100 and 1000000 and score % 100 = 0),
+  levels_completed smallint not null check (levels_completed between 0 and 20),
   best_streak smallint not null check (best_streak between 0 and 20),
   played_at timestamptz not null default now(),
-  constraint valid_score_for_progress check (score = levels_completed * 100)
+  assisted boolean not null default false,
+  constraint valid_score_for_progress check (assisted or score = levels_completed * 100)
 );
 
 create index if not exists grammar_scores_grade_score_idx
@@ -32,5 +35,4 @@ create policy "Grammar Quest leaderboard submit"
   on public.grammar_scores for insert to anon, authenticated
   with check (char_length(trim(player_name)) between 2 and 20
     and player_name !~ '[[:cntrl:]]'
-    and score = levels_completed * 100
-    and best_streak <= levels_completed);
+    and (assisted or (score = levels_completed * 100 and best_streak <= levels_completed)));
