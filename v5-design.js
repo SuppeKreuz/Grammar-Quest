@@ -28,11 +28,12 @@ applyTheme=function(){
  let accent=colorValid(raw.accent)?raw.accent:'#3199e9';
  let changed=false;
  if(contrast(surface,bg)<1.30){
-  surface=blend(bg,luminance(bg)<0.25?'#ffffff':'#111827',luminance(bg)<0.25?0.16:0.14);
+  const target=luminance(bg)<0.20?'#ffffff':'#111827';
+  for(let amount=0.14;amount<=0.86&&contrast(surface,bg)<1.30;amount+=0.06)surface=blend(bg,target,amount);
   changed=true;
  }
  if(contrast(ink,surface)<4.5){
-  ink=contrast('#f8fbff',surface)>=contrast('#152338',surface)?'#f8fbff':'#152338';
+  ink=['#f8fbff','#152338','#ffffff','#000000'].find(candidate=>contrast(candidate,surface)>=4.5)||'#000000';
   changed=true;
  }
  if(contrast(accent,surface)<3){
