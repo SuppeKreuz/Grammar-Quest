@@ -71,7 +71,7 @@ function lesson(grade,level){
  const progress=Math.max(0,level-20);
  const gradeOffset=grade===8?0:grade===9?1:2;
  const maxTier=Math.min(3,Math.floor(progress/30)+gradeOffset);
- const minTier=Math.max(0,Math.min(maxTier,Math.floor(progress/90)+gradeOffset-1));
+ const minTier=Math.max(gradeOffset===2?1:0,maxTier-2); // Keep advanced material challenging while revisiting important earlier grammar.
  const pool=entries.filter(e=>e[1]>=minTier&&e[1]<=maxTier);
  const slot=(Math.floor(level*7+random()*pool.length))%pool.length;
  const chosen=pool[slot];
