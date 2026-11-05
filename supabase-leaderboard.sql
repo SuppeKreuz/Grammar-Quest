@@ -9,10 +9,10 @@ create table if not exists public.grammar_scores (
   id bigint generated always as identity primary key,
   player_name text not null check (char_length(trim(player_name)) between 2 and 20),
   grade smallint not null check (grade in (8,9,10)),
+  is_admin boolean not null default false,
   score integer not null check ((score between 100 and 2000 and score % 100 = 0) or (is_admin and score between 100 and 100000000 and score % 100 = 0)),
   levels_completed smallint not null check (levels_completed between 1 and 20),
   best_streak smallint not null check (best_streak between 0 and 20),
-  is_admin boolean not null default false,
   played_at timestamptz not null default now(),
   constraint valid_score_for_progress check (is_admin or score = levels_completed * 100)
 );
