@@ -15,8 +15,8 @@
 - **Vorhandene Spielstände bleiben unangetastet.** Die v4-Daten bleiben unter dem bisherigen Local-Storage-Schlüssel `grammar-quest-v2`. Die neuen Extras werden separat unter `grammar-quest-v5-extras` gespeichert.
 - Vorhandener Spielfortschritt wird bei der ersten Nutzung für Münzen/Abzeichen berücksichtigt. Wiederholtes Absolvieren bereits gutgeschriebener Levels gibt nicht erneut Münzen.
 - Shop, Münzen, Avatare und Erfolge werden **nur im jeweiligen Browser** gespeichert und **nicht geräteübergreifend synchronisiert**.
-- Das gemeinsame Supabase-Leaderboard speichert reguläre und admin-unterstützte Ergebnisse in derselben Tabelle. Für bestehende Datenbanken wird `migrations/admin_online_points.sql` einmalig benötigt; bei neuen Datenbanken genügt die aktualisierte `supabase-leaderboard.sql`.
-- Admin-Punkte stehen in der **gleichen öffentlichen Rangliste** wie reguläre Punkte, ohne gesonderte Anzeige. Sie werden beim Auslösen von Punkte-Aktionen hochgeladen; alte lokale Admin-Ergebnisse lassen sich per „Save my current points online“ übertragen. Ohne echte serverseitige Authentifizierung sind die Einträge **nicht fälschungssicher**.
+- Das gemeinsame Supabase-Leaderboard speichert reguläre und admin-unterstützte Ergebnisse in derselben Tabelle. Bestehende Datenbanken benötigen die Migration `migrations/server_admin_scores.sql` und die Supabase-Edge-Function `grammar-admin-score`. Bei neuen Datenbanken bildet `supabase-leaderboard.sql` die richtige Tabellenstruktur ab; die Edge Function muss zusätzlich bereitgestellt werden.
+- Admin-Punkte stehen in der **gleichen öffentlichen Rangliste** wie reguläre Punkte, ohne gesonderte Anzeige. Sie werden beim Auslösen von Punkte-Aktionen über eine Supabase-Edge-Function hochgeladen; alte lokale Admin-Ergebnisse lassen sich per „Save my current points online“ übertragen. Der direkte öffentliche Datenbankzugang akzeptiert weiterhin nur reguläre Punkte.
 
 ### Version 5.0 lokal testen
 
@@ -75,7 +75,7 @@ Die Spieloberfläche ist auf Englisch. **Grammatikregeln und Lerntipps sind auf 
 
 In der Online-Rangliste werden **Spielername, Klassenstufe, Punkte und Spielfortschritt** gespeichert und öffentlich angezeigt. Verwende deshalb bitte **einen Spitznamen, nicht deinen echten Namen**. Der lokale Spielstand und die Designauswahl werden im Browser gespeichert.
 
-**Hinweis zur Fairness:** Die Online-Rangliste enthält jetzt auch **Admin-Punkte, die genau wie reguläre Punkte zählen**. Die Datenbank kennzeichnet solche Einträge intern als `assisted`, die Oberfläche trennt sie aber nicht. Das ermöglicht gewünschte Admin-Ergebnisse, macht die öffentliche Rangliste jedoch nicht fälschungssicher: Der Admin-Zugangscode steht im öffentlich lesbaren Quelltext, und anonyme API-Nutzer können ohne serverseitige Authentifizierung selbst manipulierte Ergebnisse einreichen. Für einen fairen Wettbewerb wäre eine serverseitige Prüf- und Berechtigungslogik nötig.
+**Hinweis zur Fairness:** Die Online-Rangliste enthält jetzt auch **Admin-Punkte, die genau wie reguläre Punkte zählen**. Die Datenbank unterscheidet solche Einträge intern über `is_admin`, zeigt das aber nicht in der Rangliste an. Normale API-Zugriffe dürfen keine Admin-Punkte eintragen; dafür ist die Edge Function mit Passwortprüfung zuständig. **Das ist dennoch nicht fälschungssicher**, da das bisherige Admin-Passwort im öffentlich einsehbaren Website-Code steht. Für einen wirklich fairen Wettbewerb wäre ein privater Admin-Login und eine serverseitige Spielprüfung erforderlich.
 
 ## Technik
 
