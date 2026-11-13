@@ -93,6 +93,12 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <form id="setupNameForm" novalidate>
    <label class="form-field" for="setupNameInput">Player name</label>
    <input id="setupNameInput" class="text-input setup-text-input" maxlength="20" autocomplete="nickname" placeholder="Your nickname" required>
+   <div id="setupOwnerLogin" class="v7-owner-login" hidden>
+    <span class="v7-owner-tag">🔒 OWNER ACCOUNT · FABIAN</span>
+    <label class="form-field" for="setupOwnerPassword">Your admin account password</label>
+    <input id="setupOwnerPassword" class="text-input" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" maxlength="128">
+    <p class="hintline">Only the owner can use this name and manage the game. Password is never stored in the browser.</p>
+   </div>
    <p class="hintline">2–20 characters. Please use a nickname rather than your real full name.</p>
    <p class="errorline" id="setupNameError" role="alert" aria-live="polite"></p>
    <button class="btn green setup-next" type="submit">Continue to grade <span aria-hidden="true">→</span></button>
@@ -259,7 +265,7 @@ const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
 const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0,runId:Date.now()+Math.random()});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
-let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
+let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOwnerSession=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
 if(remoteReady) leaderMode='online';
 function readStore(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE)||'null');if(parsed&&typeof parsed==='object'){store={...store,...parsed};if(![8,9,10].includes(+store.grade))store.grade=8;if(!store.profiles||typeof store.profiles!=='object')store.profiles={};if(!store.records||typeof store.records!=='object')store.records={};if(typeof store.motion!=='boolean')store.motion=true;if(!['presets','custom'].includes(store.designMode))store.designMode='presets';if(!Object.keys(PRESETS).includes(store.preset))store.preset='ocean';if(!store.custom||typeof store.custom!=='object')store.custom={...CUSTOM_DEFAULT};store.custom={...CUSTOM_DEFAULT,...store.custom};for(const k of ['accent','bg','surface','ink'])if(!colorValid(store.custom[k]))store.custom[k]=CUSTOM_DEFAULT[k];if(!Number.isFinite(+store.custom.radius))store.custom.radius=24;store.custom.radius=Math.max(6,Math.min(36,Math.round(+store.custom.radius)));if(!['rounded','classic','mono'].includes(store.custom.font))store.custom.font='rounded';if(!['glow','dots','grid','plain'].includes(store.custom.pattern))store.custom.pattern='glow';}}catch(err){console.warn('Local storage unavailable',err);}}
@@ -286,6 +292,19 @@ async function nicknameAllowed(name){
  const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({action:'check-name',input_name:name})});
  if(!response.ok)throw new Error('Name check failed: '+response.status);
  return (await response.json()).allowed===true;
+}
+function isOwnerNickname(name){return String(name||'').toLowerCase().replace(/[ _-]/g,'')==='fabian';}
+function clearAdminSession(){
+ adminUnlocked=false;adminOwnerSession=false;adminOnlinePassphrase='';
+ $('adminPassword').value='';
+ $('setupOwnerPassword').value='';
+ if($('adminDialog').open)$('adminDialog').close();
+}
+function updateOwnerLoginVisibility(){
+ const protectedName=isOwnerNickname($('setupNameInput').value);
+ $('setupOwnerLogin').hidden=!protectedName;
+ $('setupOwnerPassword').required=protectedName;
+ if(!protectedName)$('setupOwnerPassword').value='';
 }
 function setName(name){store.name=name;ensureProfile();persist();resetTiles();renderAll();}
 function profileDialog(force=false){$('profileError').textContent='';$('nameInput').value=store.name;$('profileClose').hidden=force;$('profileDialog').dataset.force=String(force);$('profileDialog').showModal();setTimeout(()=>$('nameInput').focus(),20);}
@@ -393,7 +412,7 @@ async function postRemoteScore(silent=false){
  const previous=Math.max(Number(st.startBest)||0,onlineBestScore(name,grade));
  if(score<=previous)return false;
  let response;
- if(st.assisted){
+ if(st.assisted||isOwnerNickname(name)){
   if(!adminUnlocked||!adminOnlinePassphrase){if(!silent)toast('Unlock the Admin console first.');return false;}
   response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
    method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
@@ -527,8 +546,9 @@ function draftProgress(){
  return {st,count,active};
 }
 function enterSetup(step=0){
+ if(step===0)clearAdminSession();
  draftName=step===0?'':store.name||'';draftGrade=step===0?null:(store.name?store.grade:null);
- draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';
+ draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';updateOwnerLoginVisibility();
  closeDialog('resultDialog');closeDialog('stageDialog');
  $('playView').hidden=true;$('setupView').hidden=false;
  setupGoTo(step);window.scrollTo({top:0,behavior:'instant'});
