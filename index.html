@@ -71,7 +71,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 </style>
 <link rel="stylesheet" href="v5.css">
 <style>.v6-intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pb-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 10px;padding:10px 12px;border:2px solid var(--surface-line);border-radius:13px;background:var(--accent-pale);color:var(--primary-text);font-size:12px;font-weight:1000}.pb-summary strong{color:var(--accent-deep);white-space:nowrap}@media(max-width:640px){.v6-intro-actions{width:100%}.v6-intro-actions .btn{flex:1}}</style>
-<link rel="stylesheet" href="v7.css">
+<link rel="stylesheet" href="v7.css?v=7.1">
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -97,7 +97,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
     <span class="v7-owner-tag">🔒 OWNER ACCOUNT · FABIAN</span>
     <label class="form-field" for="setupOwnerPassword">Your admin account password</label>
     <input id="setupOwnerPassword" class="text-input" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" maxlength="128">
-    <p class="hintline">Only the owner can use this name and manage the game. Password is never stored in the browser.</p>
+    <p class="hintline">Only the owner can use this name and manage the game. The password stays in memory only during this session; it is not saved on this device.</p>
    </div>
    <p class="hintline">2–20 characters. Please use a nickname rather than your real full name.</p>
    <p class="errorline" id="setupNameError" role="alert" aria-live="polite"></p>
@@ -715,6 +715,6 @@ readStore();store.name='';applyTheme();renderSettings();resetTiles();enterSetup(
 <script src="v5-hub.js"></script>
 <script src="v5-weekly.js"></script>
 <script src="v7-admin.js"></script>
-<script src="v7-ui.js"></script>
+<script src="v7-ui.js?v=7.1"></script>
 </body>
 </html>
