@@ -272,6 +272,20 @@ function shuffle(ids){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.ra
 function tokens(){return lesson()[1].split(' ').map((word,id)=>({word,id}));}
 function resetTiles(){selection=[];tileOrder=shuffle(tokens().map(t=>t.id));feedback=null;}
 function safeName(raw){const value=raw.trim().replace(/\s+/g,' ');if(value.length<2||value.length>20||!/^[\p{L}\p{N}_ -]+$/u.test(value))return null;return value;}
+function quickNicknameCheck(name){
+ const leet={'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','@':'a','$':'s','!':'i','ä':'a','ö':'o','ü':'u','ß':'s'};
+ const normalized=name.toLocaleLowerCase('en-US').replace(/[013457@$!äöüß]/g,c=>leet[c]||c).replace(/[^a-z0-9]/g,'');
+ const denied=['fuck','shit','bitch','cunt','nigger','nigga','nazi','hitler','hurensohn','arschloch','wichser','fotze','scheise','scheisse','schlampe','hure','spasti','kike','verpiss','retard'];
+ return normalized.length>=2&&!denied.some(word=>normalized.includes(word));
+}
+async function nicknameAllowed(name){
+ if(!quickNicknameCheck(name))return false;
+ if(!remoteReady)return true;
+ const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/rpc/grammar_name_allowed';
+ const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({input_name:name})});
+ if(!response.ok)throw new Error('Name check failed: '+response.status);
+ return (await response.json())===true;
+}
 function setName(name){store.name=name;ensureProfile();persist();resetTiles();renderAll();}
 function profileDialog(force=false){$('profileError').textContent='';$('nameInput').value=store.name;$('profileClose').hidden=force;$('profileDialog').dataset.force=String(force);$('profileDialog').showModal();setTimeout(()=>$('nameInput').focus(),20);}
 function closeDialog(id){const dialog=$(id);if(dialog.open)dialog.close();}
