@@ -574,8 +574,24 @@ async function submitSetupName(){
  button.disabled=true;$('setupNameError').textContent='Checking your nickname…';
  try{
   if(!(await nicknameAllowed(name))){$('setupNameError').textContent='This nickname is not allowed. Please choose a friendly name.';return;}
+  if(isOwnerNickname(name)){
+   if(!remoteReady||!navigator.onLine){$('setupNameError').textContent='The Fabian account requires an internet connection.';return;}
+   const password=$('setupOwnerPassword').value;
+   if(!password){$('setupNameError').textContent='Enter the Fabian account password.';$('setupOwnerPassword').focus();return;}
+   const response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
+    method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
+    body:JSON.stringify({action:'owner-login',player_name:name,password})
+   });
+   if(!response.ok){$('setupNameError').textContent=response.status===401?'Incorrect password. Please try again.':'The protected account is currently unavailable.';return;}
+   const verified=await response.json();
+   if(verified.verified!==true){$('setupNameError').textContent='Could not verify your account.';return;}
+   adminUnlocked=true;adminOwnerSession=true;adminOnlinePassphrase=password;
+   $('setupOwnerPassword').value='';
+  }else{
+   clearAdminSession();
+  }
   $('setupNameError').textContent='';draftGrade=null;draftName=name;setupGoTo(1);sound('tap');
- }catch(err){console.warn('Name check failed:',err);$('setupNameError').textContent='Nickname check unavailable. Check your internet connection.';}
+ }catch(err){console.warn('Player sign-in failed:',err);$('setupNameError').textContent='Name or login service unavailable. Check your internet connection.';}
  finally{button.disabled=false;}
 }
 function selectDraftGrade(grade){if(![8,9,10].includes(grade))return;draftGrade=grade;
@@ -601,6 +617,7 @@ function renderSetupStages(){
 }
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
+ if(isOwnerNickname(draftName)&&(!adminOwnerSession||!adminUnlocked)){setupGoTo(0);$('setupNameError').textContent='Please sign in to use the protected Fabian account.';return;}
  const {st,count,active}=draftProgress();
  const key=String(draftName).toLocaleLowerCase('en-US').trim();
  store.profiles[key]??={};
@@ -627,6 +644,7 @@ function updatePlayIntro(){
  $('playJourney').textContent=game().level>=20?`Grade ${store.grade} · ∞ Endless · Level ${(game().level+1).toLocaleString('en-US')}`:`Grade ${store.grade} · ${STAGE_BOUNDS[stageIndex(game().level)].name} path · Level ${game().level+1} / 20`;
 }
 $('setupNameForm').addEventListener('submit',e=>{e.preventDefault();submitSetupName();});
+$('setupNameInput').addEventListener('input',updateOwnerLoginVisibility);
 $('setupBackToName').addEventListener('click',()=>setupGoTo(0));
 $('setupBackToGrade').addEventListener('click',()=>setupGoTo(1));
 $('setupNextToDifficulty').addEventListener('click',()=>{if(draftGrade)setupGoTo(2);});
@@ -636,7 +654,7 @@ $('changeChoices').addEventListener('click',()=>enterSetup(0));
 $('setupRules').addEventListener('click',showRules);
 
 // ------------------------------ Wiring -----------------------------
-$('profileForm').addEventListener('submit',event=>{event.preventDefault();const name=safeName($('nameInput').value);if(!name){$('profileError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';return;}setName(name);closeDialog('profileDialog');toast(`Welcome, ${name}!`);});
+$('profileForm').addEventListener('submit',event=>{event.preventDefault();const name=safeName($('nameInput').value);if(!name){$('profileError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';return;}closeDialog('profileDialog');enterSetup(0);$('setupNameInput').value=name;updateOwnerLoginVisibility();});
 $('checkButton').addEventListener('click',tryCheck);$('resetButton').addEventListener('click',resetSentence);$('undoButton').addEventListener('click',undo);
 document.querySelectorAll('[data-grade]').forEach(b=>b.addEventListener('click',()=>switchGrade(+b.dataset.grade)));
 $('rulesOpen').addEventListener('click',showRules);$('leaderOpen').addEventListener('click',openBoard);$('fullBoardButton').addEventListener('click',openBoard);$('profileOpen').addEventListener('click',()=>enterSetup(0));
