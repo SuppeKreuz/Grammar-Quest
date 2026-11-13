@@ -293,7 +293,11 @@ async function nicknameAllowed(name){
  if(!response.ok)throw new Error('Name check failed: '+response.status);
  return (await response.json()).allowed===true;
 }
-function isOwnerNickname(name){return String(name||'').toLowerCase().replace(/[ _-]/g,'')==='fabian';}
+function isOwnerNickname(name){
+ const substitutions={'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','ä':'a','ö':'o','ü':'u','ß':'s'};
+ const normalized=String(name||'').toLocaleLowerCase('en-US').replace(/[013457äöüß]/g,c=>substitutions[c]||c).replace(/[^a-z0-9]/g,'');
+ return normalized==='fabian';
+}
 function clearAdminSession(){
  adminUnlocked=false;adminOwnerSession=false;adminOnlinePassphrase='';
  $('adminPassword').value='';
@@ -568,6 +572,7 @@ function setupGoTo(step){
  else document.querySelector(`#setupPage${setupStep} h2`)?.focus?.({preventScroll:true});
 }
 async function submitSetupName(){
+ updateOwnerLoginVisibility(); // Also handle browser autofill that did not fire an input event.
  const name=safeName($('setupNameInput').value);
  if(!name){$('setupNameError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
  const button=$('setupNameForm').querySelector('button[type="submit"]');
