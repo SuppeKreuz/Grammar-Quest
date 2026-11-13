@@ -256,7 +256,7 @@ const RULES={
 ]};
 const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
-const freshState=()=>({level:0,score:0,lives:3,streak:0,bestStreak:0,solved:false});
+const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
 let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
@@ -281,12 +281,38 @@ function notice(kind,text){feedback={kind,text};renderGame();}
 function updateRecords(){const st=game(),k=`${store.grade}:${playerKey()}`,old=store.records[k];const complete=Math.max(st.level+(st.solved?1:0),Math.floor(st.score/100));if(!old||st.score>old.score||(st.score===old.score&&complete>old.completed)){store.records[k]={name:store.name,grade:store.grade,score:st.score,completed:complete,bestStreak:st.bestStreak,assisted:Boolean(st.assisted),updatedAt:new Date().toISOString()};}persist();}
 function correct(auto=false){const st=game();if(st.lives<=0||st.solved)return;if(!Number.isSafeInteger(st.score)||st.score>Number.MAX_SAFE_INTEGER-100)return;
  if(auto)selection=tokens().map(t=>t.id);
+ st.mistakes=0;st.lastWrong=null;
  st.score+=100;st.streak++;st.bestStreak=Math.max(st.bestStreak,st.streak);st.solved=true;feedback={kind:'success',text:auto?'Admin auto-solve! +100 points.':'Amazing! That sentence is correct. +100 points!'};
  updateRecords();renderAll();pointFloat();sound('success');burstAt($('checkButton'));if(remoteReady&&!st.assisted)postRemoteScore(true).catch(console.warn);if(st.level===19){confetti(65);toast('Classic path complete! Endless Challenge is unlocked!');}else if(STAGE_BOUNDS.some(s=>s.end===st.level)){confetti(28);setTimeout(showStageComplete,700);}
 }
-function tryCheck(){const st=game();if(!store.name){profileDialog(true);return;}if(st.lives<=0){openResult(false);return;}if(st.solved){advanceLevel();return;}
- const words=tokens();if(selection.length!==words.length){notice('info',`Choose all ${words.length} words before checking.`);sound('error');return;}
- const answer=selection.map(id=>words[id].word).join(' ');if(answer===lesson()[1])correct();else{st.lives--;st.streak=0;persist();if(st.lives===0){feedback={kind:'error',text:'No lives left. Keep practising and try again!'};renderAll();sound('error');setTimeout(()=>openResult(false),550);}else{resetTiles();feedback={kind:'error',text:`Not quite! You lost a life. ${st.lives} ${st.lives===1?'life':'lives'} remaining.`};renderAll();$('gameCard').classList.remove('shake');void $('gameCard').offsetWidth;$('gameCard').classList.add('shake');sound('error');}}}
+function recordWrongAttempt(mode,chosen,expected){
+ const st=game();
+ if(st.mistakeLevel!==st.level||st.mistakeMode!==mode){st.mistakes=0;st.mistakeLevel=st.level;st.mistakeMode=mode;}
+ st.mistakes=(Number(st.mistakes)||0)+1;
+ st.lastWrong={mode,chosen:String(chosen||'').slice(0,250),expected:String(expected||'').slice(0,250)};
+ st.lives=Math.max(0,st.lives-1);st.streak=0;
+ const n=st.mistakes;
+ const message=st.lives===0?'No lives left. Your personal best is safe.':
+  n>=3?`You've made ${n} mistakes on this question. Read the German explanation below, then try again!`:
+  `Not quite! One life lost. ${st.lives} lives left.`;
+ resetTiles();feedback={kind:'error',text:message};persist();renderAll();sound('error');
+ const card=$('gameCard');card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');
+ if(st.lives===0)setTimeout(()=>openResult(false),700);
+}
+function tryCheck(){
+ const st=game();if(!store.name){profileDialog(true);return;}
+ if(st.lives<=0){openResult(false);return;}
+ if(st.solved){advanceLevel();return;}
+ const words=tokens();
+ if(selection.length!==words.length){notice('info',`Choose all ${words.length} words before checking.`);sound('error');return;}
+ const answer=selection.map(id=>words[id].word).join(' ');
+ if(answer===lesson()[1]){correct();return;}
+ const expected=lesson()[1].split(' '),actual=answer.split(' ');
+ const first=actual.findIndex((w,i)=>w!==expected[i]);
+ const detail=first>=0?`Position ${first+1}: "${actual[first]}"`:'Wrong word order';
+ const wanted=first>=0?`Position ${first+1}: "${expected[first]}"`:lesson()[1];
+ recordWrongAttempt('order',detail,wanted);
+}
 function resetSentence(){if(game().solved||game().lives<=0)return;resetTiles();renderGame();sound('tap');}
 function undo(){if(!selection.length||game().solved||game().lives<=0)return;selection.pop();feedback=null;renderGame();sound('tap');}
 function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson()[0]],count=levels().length,complete=st.level+(st.solved?1:0);updatePlayIntro();
@@ -361,7 +387,7 @@ async function postRemoteScore(silent=false){
 function openAdmin(){$('adminError').textContent='';$('adminPassword').value='';$('adminLock').hidden=adminUnlocked;$('adminTools').hidden=!adminUnlocked;$('adminStatus').textContent='';if(!$('adminDialog').open)$('adminDialog').showModal();}
 function adminAction(action){if(!adminUnlocked||!store.name)return;const st=game(),scoreBefore=st.score;if(action!=='clear')st.assisted=true;let msg='';if(action==='correct'){if(st.solved){msg='This level is already solved.';}else if(st.lives<=0){msg='Restore lives first.';}else{correct(true);msg='Level auto-solved.';}}
  else if(action==='bonus'){st.score+=500;updateRecords();msg='+500 points added.';}
- else if(action==='lives'){st.lives=3;msg='All lives restored.';}
+ else if(action==='lives'){st.lives=5;msg='All five lives restored.';}
  else if(action==='next'){if(st.level<Number.MAX_SAFE_INTEGER-2){st.level++;st.solved=false;resetTiles();msg='Next level unlocked.';}else msg='Already at the final level.';}
  else if(action==='unlock'){const next=STAGE_BOUNDS.find(s=>s.start>st.level);if(next){st.level=next.start;st.solved=false;resetTiles();msg=`${next.name} stage unlocked (admin).`;}else msg='Already at the final stage.';}
  else if(action==='win'){st.level=Math.max(st.level,19);st.solved=true;st.score=Math.max(st.score,2000);st.lives=Math.max(st.lives,1);resetTiles();selection=tokens().map(t=>t.id);updateRecords();msg='Grade marked complete!';confetti();}
@@ -409,7 +435,7 @@ function renderPath(){
  const current=STAGE_BOUNDS[Math.min(2,stageIndex(game().level))];
  $('pathFootText').textContent=count===20?'All three stages complete — the endless challenge has started!':`${current.name} · ${Math.min(count-current.start,current.end-current.start+1)} / ${current.end-current.start+1} challenges cleared`;
 }
-function advanceLevel(){const st=game();if(!st.solved||st.level>=Number.MAX_SAFE_INTEGER-2)return;st.level++;st.solved=false;persist();resetTiles();renderAll();entrance();sound('tap');}
+function advanceLevel(){const st=game();if(!st.solved||st.level>=Number.MAX_SAFE_INTEGER-2)return;st.level++;st.solved=false;st.mistakes=0;st.lastWrong=null;st.mistakeLevel=st.level;persist();resetTiles();renderAll();entrance();sound('tap');}
 function entrance(){if(!motionAllowed())return;const card=$('gameCard');card.classList.remove('level-enter');void card.offsetWidth;card.classList.add('level-enter');}
 function showStageComplete(){const st=game(),stage=STAGE_BOUNDS.find(s=>s.end===st.level);if(!stage||stage.key==='hard'||!st.solved)return;
  if([...document.querySelectorAll('dialog')].some(d=>d.open)){toast(`${stage.name} completed! Next stage unlocked.`);return;}
