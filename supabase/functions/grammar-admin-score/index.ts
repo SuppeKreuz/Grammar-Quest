@@ -142,7 +142,21 @@ Deno.serve(async (request: Request): Promise<Response> => {
   let body: Record<string, unknown>;
   try { body = await request.json(); }
   catch { return reply(400, "Invalid JSON."); }
-  if (!body || typeof body !== "object" || !(await validAdminPassword(body.passphrase))) {
+  if (!body || typeof body !== "object") return reply(400, "Invalid request.");
+  // Public, readonly nickname lookup. Only the server can execute the privileged DB RPC.
+  if (body.action === "check-name") {
+    const name=typeof body.input_name==="string"?body.input_name.trim():"";
+    if(name.length<2||name.length>20)return replyData(200,{allowed:false});
+    const base=Deno.env.get("SUPABASE_URL")?.replace(/\/$/,"");
+    const headers=serverHeaders();
+    if(!base||!headers)return reply(503,"Name validation is unavailable.");
+    try{
+      const checked=await fetch(base+"/rest/v1/rpc/grammar_name_allowed",{method:"POST",headers,body:JSON.stringify({input_name:name})});
+      if(!checked.ok)return reply(503,"Name check unavailable.");
+      return replyData(200,{allowed:(await checked.json())===true});
+    }catch(_err){return reply(503,"Name check unavailable.");}
+  }
+  if (!(await validAdminPassword(body.passphrase))) {
     return reply(401, "Incorrect admin passphrase.");
   }
 
