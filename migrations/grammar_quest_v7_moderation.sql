@@ -16,7 +16,7 @@ returns text language sql immutable
 set search_path = ''
 as $fn$
  select pg_catalog.regexp_replace(
-   pg_catalog.translate(pg_catalog.lower(pg_catalog.coalesce(input_name,'')),
+   pg_catalog.translate(pg_catalog.lower(coalesce(input_name,'')),
      '013457@$!äöüß', 'oieastasiaous'),
    '[^a-z0-9]', '', 'g');
 $fn$;
@@ -29,10 +29,10 @@ set search_path = ''
 as $fn$
 declare clean text;
 begin
- if input_name is null or pg_catalog.char_length(pg_catalog.btrim(input_name)) not between 2 and 20
+ if input_name is null or char_length(pg_catalog.btrim(input_name)) not between 2 and 20
     or input_name !~ '^[[:alnum:]_ -]+$' then return false; end if;
  clean := public.grammar_name_key(input_name);
- if pg_catalog.char_length(clean) < 2 then return false; end if;
+ if char_length(clean) < 2 then return false; end if;
  if clean ~ '(hurensohn|arschloch|wichser|fotze|scheise|scheisse|fucker|fuck|fuk|shit|bitch|cunt|nigger|nigga|heilhitler|hitler|nazi|hakenkreuz|kike|retard|spasti|verpiss|wanker|motherfucker|drecksau|schlampe|hure)' then
    return false;
  end if;
