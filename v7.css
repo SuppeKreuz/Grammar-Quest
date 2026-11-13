@@ -15,7 +15,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .brand b{font-size:21px;letter-spacing:-1px}
 .brand small{letter-spacing:1.4px;font-size:9px}
 .top .nav{gap:9px}
-.top #rulesOpen,.top #leaderOpen,.top #profileOpen{display:none!important}
+.top #leaderOpen,.top #profileOpen{display:none!important}
+.top #rulesOpen{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;padding:9px 13px;min-height:44px;border:1px solid var(--surface-line,#d7e8f5);border-radius:14px;background:var(--surface,#fff);color:var(--primary-text,#183750);font-size:12px}
 .top .icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--surface-line,#d6e7f6);background:var(--surface,#fff);color:var(--primary-text,#16344e);box-shadow:0 3px 10px #0b508d0c}
 .wrap{width:min(1170px,calc(100% - 44px))}
 .panel{border:1px solid var(--surface-line,#d8e7f4);box-shadow:0 13px 35px #19436913;border-radius:var(--v7-radius);background:var(--surface,#fff)}
@@ -146,6 +147,9 @@ dialog::backdrop,.v5-dialog::backdrop{background:#09243ba9;backdrop-filter:blur(
  .play-intro{align-items:flex-start}
 }
 @media(max-width:600px){
+ .top #rulesOpen{min-width:39px;padding:9px}
+ .top #rulesOpen .menu-label{display:none}
+
  .wrap{width:calc(100% - 23px)}
  .top-inner{min-height:62px}
  .brand b{font-size:18px}
