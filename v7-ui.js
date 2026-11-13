@@ -32,7 +32,8 @@ const bottom=document.createElement('nav');bottom.id='v7BottomNav';bottom.setAtt
 const icons={
  home:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9M9 21v-7h6v7"/></svg>',
  levels:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5 9 3l6 3.5L21 3v14.5l-6 3.5-6-3.5L3 21z"/><path d="M9 3v14.5m6-11v14.5"/></svg>',
- ranking:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5c0 5-3 8-5 8s-5-3-5-8z"/><path d="M7 6H4v2c0 3 2 5 4 5m9-7h3v2c0 3-2 5-4 5"/></svg>'
+ ranking:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5c0 5-3 8-5 8s-5-3-5-8z"/><path d="M7 6H4v2c0 3 2 5 4 5m9-7h3v2c0 3-2 5-4 5"/></svg>',
+ admin:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.9l.07.07-2.1 2.1-.07-.07a1.7 1.7 0 0 0-1.9-.34 1.7 1.7 0 0 0-1.04 1.56V21h-3v-.1a1.7 1.7 0 0 0-1.04-1.56 1.7 1.7 0 0 0-1.9.34l-.07.07-2.1-2.1.07-.07a1.7 1.7 0 0 0 .34-1.9A1.7 1.7 0 0 0 5.44 14H5v-3h.44A1.7 1.7 0 0 0 7 9.96a1.7 1.7 0 0 0-.34-1.9L6.6 8l2.1-2.1.07.07a1.7 1.7 0 0 0 1.9.34A1.7 1.7 0 0 0 11.7 4.75V4h3v.75a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.9-.34l.07-.07 2.1 2.1-.07.07a1.7 1.7 0 0 0-.34 1.9A1.7 1.7 0 0 0 20.96 11H21v3h-.04A1.7 1.7 0 0 0 19.4 15Z"/></svg>'
 };
 function navItem(key,label,callback){
  const button=document.createElement('button');button.type='button';button.dataset.v7Tab=key;
@@ -47,9 +48,11 @@ function navItem(key,label,callback){
 bottom.append(
  navItem('home','Home',()=>{const d=$('leaderDialog');if(d?.open)d.close();const m=$('v5MapDialog');if(m?.open)m.close();$('gameCard')?.scrollIntoView({behavior:'smooth',block:'start'});}),
  navItem('levels','Levels',()=>{if(mapButton)mapButton.click();else toast('Level map is not available.');}),
- navItem('ranking','Ranking',()=>{if(typeof openBoard==='function')openBoard();})
+ navItem('ranking','Ranking',()=>{if(typeof openBoard==='function')openBoard();}),
+ navItem('admin','Admin',()=>{if(adminOwnerSession&&adminUnlocked&&isOwnerNickname(store.name))openAdmin();})
 );
 document.body.appendChild(bottom);
+const ownerAdminTab=bottom.querySelector('[data-v7-tab="admin"]');ownerAdminTab.hidden=true;
 bottom.querySelector('[data-v7-tab="home"]').classList.add('active');
 bottom.querySelector('[data-v7-tab="home"]').setAttribute('aria-current','page');
 function liveHud(){
@@ -64,6 +67,7 @@ function liveHud(){
 function syncPage(){
  const active=!play.hidden;
  document.body.classList.toggle('v7-playing',active);
+ ownerAdminTab.hidden=!(active&&adminOwnerSession&&adminUnlocked&&isOwnerNickname(store.name));
  if(active)liveHud();
 }
 const baseRenderAll=renderAll;

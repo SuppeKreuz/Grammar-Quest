@@ -71,7 +71,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 </style>
 <link rel="stylesheet" href="v5.css">
 <style>.v6-intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pb-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 10px;padding:10px 12px;border:2px solid var(--surface-line);border-radius:13px;background:var(--accent-pale);color:var(--primary-text);font-size:12px;font-weight:1000}.pb-summary strong{color:var(--accent-deep);white-space:nowrap}@media(max-width:640px){.v6-intro-actions{width:100%}.v6-intro-actions .btn{flex:1}}</style>
-<link rel="stylesheet" href="v7.css">
+<link rel="stylesheet" href="v7.css?v=7.1">
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -93,6 +93,12 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <form id="setupNameForm" novalidate>
    <label class="form-field" for="setupNameInput">Player name</label>
    <input id="setupNameInput" class="text-input setup-text-input" maxlength="20" autocomplete="nickname" placeholder="Your nickname" required>
+   <div id="setupOwnerLogin" class="v7-owner-login" hidden>
+    <span class="v7-owner-tag">🔒 OWNER ACCOUNT · FABIAN</span>
+    <label class="form-field" for="setupOwnerPassword">Your admin account password</label>
+    <input id="setupOwnerPassword" class="text-input" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" maxlength="128">
+    <p class="hintline">Only the owner can use this name and manage the game. The password stays in memory only during this session; it is not saved on this device.</p>
+   </div>
    <p class="hintline">2–20 characters. Please use a nickname rather than your real full name.</p>
    <p class="errorline" id="setupNameError" role="alert" aria-live="polite"></p>
    <button class="btn green setup-next" type="submit">Continue to grade <span aria-hidden="true">→</span></button>
@@ -259,7 +265,7 @@ const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
 const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0,runId:Date.now()+Math.random()});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
-let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
+let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOwnerSession=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
 if(remoteReady) leaderMode='online';
 function readStore(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE)||'null');if(parsed&&typeof parsed==='object'){store={...store,...parsed};if(![8,9,10].includes(+store.grade))store.grade=8;if(!store.profiles||typeof store.profiles!=='object')store.profiles={};if(!store.records||typeof store.records!=='object')store.records={};if(typeof store.motion!=='boolean')store.motion=true;if(!['presets','custom'].includes(store.designMode))store.designMode='presets';if(!Object.keys(PRESETS).includes(store.preset))store.preset='ocean';if(!store.custom||typeof store.custom!=='object')store.custom={...CUSTOM_DEFAULT};store.custom={...CUSTOM_DEFAULT,...store.custom};for(const k of ['accent','bg','surface','ink'])if(!colorValid(store.custom[k]))store.custom[k]=CUSTOM_DEFAULT[k];if(!Number.isFinite(+store.custom.radius))store.custom.radius=24;store.custom.radius=Math.max(6,Math.min(36,Math.round(+store.custom.radius)));if(!['rounded','classic','mono'].includes(store.custom.font))store.custom.font='rounded';if(!['glow','dots','grid','plain'].includes(store.custom.pattern))store.custom.pattern='glow';}}catch(err){console.warn('Local storage unavailable',err);}}
@@ -286,6 +292,23 @@ async function nicknameAllowed(name){
  const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({action:'check-name',input_name:name})});
  if(!response.ok)throw new Error('Name check failed: '+response.status);
  return (await response.json()).allowed===true;
+}
+function isOwnerNickname(name){
+ const substitutions={'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','ä':'a','ö':'o','ü':'u','ß':'s'};
+ const normalized=String(name||'').toLocaleLowerCase('en-US').replace(/[013457äöüß]/g,c=>substitutions[c]||c).replace(/[^a-z0-9]/g,'');
+ return normalized==='fabian';
+}
+function clearAdminSession(){
+ adminUnlocked=false;adminOwnerSession=false;adminOnlinePassphrase='';
+ $('adminPassword').value='';
+ $('setupOwnerPassword').value='';
+ if($('adminDialog').open)$('adminDialog').close();
+}
+function updateOwnerLoginVisibility(){
+ const protectedName=isOwnerNickname($('setupNameInput').value);
+ $('setupOwnerLogin').hidden=!protectedName;
+ $('setupOwnerPassword').required=protectedName;
+ if(!protectedName)$('setupOwnerPassword').value='';
 }
 function setName(name){store.name=name;ensureProfile();persist();resetTiles();renderAll();}
 function profileDialog(force=false){$('profileError').textContent='';$('nameInput').value=store.name;$('profileClose').hidden=force;$('profileDialog').dataset.force=String(force);$('profileDialog').showModal();setTimeout(()=>$('nameInput').focus(),20);}
@@ -393,7 +416,7 @@ async function postRemoteScore(silent=false){
  const previous=Math.max(Number(st.startBest)||0,onlineBestScore(name,grade));
  if(score<=previous)return false;
  let response;
- if(st.assisted){
+ if(st.assisted||isOwnerNickname(name)){
   if(!adminUnlocked||!adminOnlinePassphrase){if(!silent)toast('Unlock the Admin console first.');return false;}
   response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
    method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
@@ -527,8 +550,9 @@ function draftProgress(){
  return {st,count,active};
 }
 function enterSetup(step=0){
+ if(step===0)clearAdminSession();
  draftName=step===0?'':store.name||'';draftGrade=step===0?null:(store.name?store.grade:null);
- draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';
+ draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';updateOwnerLoginVisibility();
  closeDialog('resultDialog');closeDialog('stageDialog');
  $('playView').hidden=true;$('setupView').hidden=false;
  setupGoTo(step);window.scrollTo({top:0,behavior:'instant'});
@@ -548,14 +572,31 @@ function setupGoTo(step){
  else document.querySelector(`#setupPage${setupStep} h2`)?.focus?.({preventScroll:true});
 }
 async function submitSetupName(){
+ updateOwnerLoginVisibility(); // Also handle browser autofill that did not fire an input event.
  const name=safeName($('setupNameInput').value);
  if(!name){$('setupNameError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
  const button=$('setupNameForm').querySelector('button[type="submit"]');
  button.disabled=true;$('setupNameError').textContent='Checking your nickname…';
  try{
   if(!(await nicknameAllowed(name))){$('setupNameError').textContent='This nickname is not allowed. Please choose a friendly name.';return;}
+  if(isOwnerNickname(name)){
+   if(!remoteReady||!navigator.onLine){$('setupNameError').textContent='The Fabian account requires an internet connection.';return;}
+   const password=$('setupOwnerPassword').value;
+   if(!password){$('setupNameError').textContent='Enter the Fabian account password.';$('setupOwnerPassword').focus();return;}
+   const response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
+    method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
+    body:JSON.stringify({action:'owner-login',player_name:name,password})
+   });
+   if(!response.ok){$('setupNameError').textContent=response.status===401?'Incorrect password. Please try again.':'The protected account is currently unavailable.';return;}
+   const verified=await response.json();
+   if(verified.verified!==true){$('setupNameError').textContent='Could not verify your account.';return;}
+   adminUnlocked=true;adminOwnerSession=true;adminOnlinePassphrase=password;
+   $('setupOwnerPassword').value='';
+  }else{
+   clearAdminSession();
+  }
   $('setupNameError').textContent='';draftGrade=null;draftName=name;setupGoTo(1);sound('tap');
- }catch(err){console.warn('Name check failed:',err);$('setupNameError').textContent='Nickname check unavailable. Check your internet connection.';}
+ }catch(err){console.warn('Player sign-in failed:',err);$('setupNameError').textContent='Name or login service unavailable. Check your internet connection.';}
  finally{button.disabled=false;}
 }
 function selectDraftGrade(grade){if(![8,9,10].includes(grade))return;draftGrade=grade;
@@ -581,6 +622,7 @@ function renderSetupStages(){
 }
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
+ if(isOwnerNickname(draftName)&&(!adminOwnerSession||!adminUnlocked)){setupGoTo(0);$('setupNameError').textContent='Please sign in to use the protected Fabian account.';return;}
  const {st,count,active}=draftProgress();
  const key=String(draftName).toLocaleLowerCase('en-US').trim();
  store.profiles[key]??={};
@@ -607,6 +649,7 @@ function updatePlayIntro(){
  $('playJourney').textContent=game().level>=20?`Grade ${store.grade} · ∞ Endless · Level ${(game().level+1).toLocaleString('en-US')}`:`Grade ${store.grade} · ${STAGE_BOUNDS[stageIndex(game().level)].name} path · Level ${game().level+1} / 20`;
 }
 $('setupNameForm').addEventListener('submit',e=>{e.preventDefault();submitSetupName();});
+$('setupNameInput').addEventListener('input',updateOwnerLoginVisibility);
 $('setupBackToName').addEventListener('click',()=>setupGoTo(0));
 $('setupBackToGrade').addEventListener('click',()=>setupGoTo(1));
 $('setupNextToDifficulty').addEventListener('click',()=>{if(draftGrade)setupGoTo(2);});
@@ -616,7 +659,7 @@ $('changeChoices').addEventListener('click',()=>enterSetup(0));
 $('setupRules').addEventListener('click',showRules);
 
 // ------------------------------ Wiring -----------------------------
-$('profileForm').addEventListener('submit',event=>{event.preventDefault();const name=safeName($('nameInput').value);if(!name){$('profileError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';return;}setName(name);closeDialog('profileDialog');toast(`Welcome, ${name}!`);});
+$('profileForm').addEventListener('submit',event=>{event.preventDefault();const name=safeName($('nameInput').value);if(!name){$('profileError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';return;}closeDialog('profileDialog');enterSetup(0);$('setupNameInput').value=name;updateOwnerLoginVisibility();});
 $('checkButton').addEventListener('click',tryCheck);$('resetButton').addEventListener('click',resetSentence);$('undoButton').addEventListener('click',undo);
 document.querySelectorAll('[data-grade]').forEach(b=>b.addEventListener('click',()=>switchGrade(+b.dataset.grade)));
 $('rulesOpen').addEventListener('click',showRules);$('leaderOpen').addEventListener('click',openBoard);$('fullBoardButton').addEventListener('click',openBoard);$('profileOpen').addEventListener('click',()=>enterSetup(0));
@@ -677,6 +720,6 @@ readStore();store.name='';applyTheme();renderSettings();resetTiles();enterSetup(
 <script src="v5-hub.js"></script>
 <script src="v5-weekly.js"></script>
 <script src="v7-admin.js"></script>
-<script src="v7-ui.js"></script>
+<script src="v7-ui.js?v=7.1"></script>
 </body>
 </html>

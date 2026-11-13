@@ -79,3 +79,16 @@ Repository als ZIP herunterladen und alle Dateien in einem Verzeichnis belassen.
 ---
 
 **Grammar Quest 7 — Learn. Play. Beat your best.**
+
+## Protected owner account (Grammar Quest 7.1)
+
+- **Fabian** is a password-protected nickname, checked without regard to capitalization or ordinary separators. No student signup or personal account system has been added.
+- Enter **Fabian** at the start screen; the password field appears. After verifying with the server, the normal grade/mode selection starts a **fresh run with 0 XP and 5 lives**.
+- The verified owner immediately sees an **Admin** tab alongside Home, Levels and Ranking. This opens the existing administrator panel, including protected moderation actions, without requiring the older separate admin passphrase.
+- Switching players removes Admin access immediately, and refreshing the page requires another password. The password is kept **in memory only** while the owner is signed in, not written to localStorage or committed to GitHub.
+- The owner's score submissions are routed through the password-verified Supabase Edge Function; anonymous direct leaderboard uploads with a normalized Fabian nickname are blocked by restrictive row-level security. Existing scores remain unchanged.
+- The password is stored **only as a bcrypt hash** inside the private Supabase table `grammar_owner_credentials`. The hash is deliberately not part of migration files or repository source.
+- Wrong password attempts are rate-limited per hashed request origin. The original separate Admin passphrase remains a backup and continues to work for the private Admin console.
+- Schema migration files: `migrations/grammar_quest_v71_owner_login.sql` and `migrations/grammar_quest_v71_owner_hardening.sql`. Update the existing `grammar-admin-score` Edge Function with `verify_jwt=false` because it performs its own password verification.
+
+**Security note:** The chosen owner password was supplied in chat and is easier to guess than a strong random password. Replace it with a longer, unique password before sharing the game with many players. There is no password reset via the public app in this version.

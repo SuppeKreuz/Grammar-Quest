@@ -53,6 +53,36 @@ function getServerKey(): string | null {
 }
 
 
+// Owner credential verification is private to the server; a failed attempt is
+// throttled by the SQL function. Raw passwords and IP addresses are never saved.
+async function validOwnerPassword(value: unknown, request: Request): Promise<boolean> {
+  if (typeof value !== "string" || value.length < 8 || value.length > 128) return false;
+  const base = Deno.env.get("SUPABASE_URL")?.replace(/\/$/, "");
+  const key = getServerKey();
+  const headers = serverHeaders();
+  if (!base || !key || !headers) return false;
+  try {
+    // Prefer the gateway-provided address. Hash it with a private server secret.
+    const rawOrigin = request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() || "unidentified";
+    const bytes = new TextEncoder().encode(key + ":" + rawOrigin);
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+    const clientHash = [...digest].map(byte => byte.toString(16).padStart(2, "0")).join("");
+    const check = await fetch(base + "/rest/v1/rpc/grammar_verify_owner_password", {
+      method: "POST",
+      headers,
+      cache: "no-store",
+      body: JSON.stringify({ p_password: value, p_client_hash: clientHash }),
+    });
+    if (!check.ok) return false;
+    return (await check.json()) === true;
+  } catch (_err) {
+    console.error("Owner login service unavailable");
+    return false;
+  }
+}
+
 function replyData(status: number, data: Record<string, unknown>): Response {
  return new Response(JSON.stringify(data), {
   status,
@@ -156,7 +186,15 @@ Deno.serve(async (request: Request): Promise<Response> => {
       return replyData(200,{allowed:(await checked.json())===true});
     }catch(_err){return reply(503,"Name check unavailable.");}
   }
-  if (!(await validAdminPassword(body.passphrase))) {
+  if (body.action === "owner-login") {
+    const requestedName = typeof body.player_name === "string" ? normalizeName(body.player_name.trim()) : "";
+    if (requestedName !== "fabian") return reply(400, "Owner nickname required.");
+    if (!(await validOwnerPassword(body.password, request))) return reply(401, "Incorrect owner password.");
+    return replyData(200, { verified: true, role: "owner" });
+  }
+  // Existing main admin passphrase continues to work. The protected Fabian
+  // account gains identical admin privileges after verifying its own password.
+  if (!(await validAdminPassword(body.passphrase)) && !(await validOwnerPassword(body.passphrase, request))) {
     return reply(401, "Incorrect admin passphrase.");
   }
 

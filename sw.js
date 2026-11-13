@@ -1,5 +1,5 @@
 /* Grammar Quest 7 – app shell cache (Supabase API is never cached). */
-const CACHE='grammar-quest-v7-1';
+const CACHE='grammar-quest-v7-2';
 const ROOT='/Grammar-Quest/';
 const APP=[
  ROOT,ROOT+'index.html',ROOT+'config.js',ROOT+'v5.css',
