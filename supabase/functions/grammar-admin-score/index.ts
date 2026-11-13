@@ -187,7 +187,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }catch(_err){return reply(503,"Name check unavailable.");}
   }
   if (body.action === "owner-login") {
-    const requestedName = typeof body.player_name === "string" ? body.player_name.trim().toLowerCase() : "";
+    const requestedName = typeof body.player_name === "string" ? normalizeName(body.player_name.trim()) : "";
     if (requestedName !== "fabian") return reply(400, "Owner nickname required.");
     if (!(await validOwnerPassword(body.password, request))) return reply(401, "Incorrect owner password.");
     return replyData(200, { verified: true, role: "owner" });
