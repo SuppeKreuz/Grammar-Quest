@@ -258,7 +258,7 @@ const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
 const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0,runId:Date.now()+Math.random()});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
-let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
+let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
 if(remoteReady) leaderMode='online';
 function readStore(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE)||'null');if(parsed&&typeof parsed==='object'){store={...store,...parsed};if(![8,9,10].includes(+store.grade))store.grade=8;if(!store.profiles||typeof store.profiles!=='object')store.profiles={};if(!store.records||typeof store.records!=='object')store.records={};if(typeof store.motion!=='boolean')store.motion=true;if(!['presets','custom'].includes(store.designMode))store.designMode='presets';if(!Object.keys(PRESETS).includes(store.preset))store.preset='ocean';if(!store.custom||typeof store.custom!=='object')store.custom={...CUSTOM_DEFAULT};store.custom={...CUSTOM_DEFAULT,...store.custom};for(const k of ['accent','bg','surface','ink'])if(!colorValid(store.custom[k]))store.custom[k]=CUSTOM_DEFAULT[k];if(!Number.isFinite(+store.custom.radius))store.custom.radius=24;store.custom.radius=Math.max(6,Math.min(36,Math.round(+store.custom.radius)));if(!['rounded','classic','mono'].includes(store.custom.font))store.custom.font='rounded';if(!['glow','dots','grid','plain'].includes(store.custom.pattern))store.custom.pattern='glow';}}catch(err){console.warn('Local storage unavailable',err);}}
@@ -536,12 +536,16 @@ function setupGoTo(step){
  if(setupStep===0)$('setupNameInput').focus({preventScroll:true});
  else document.querySelector(`#setupPage${setupStep} h2`)?.focus?.({preventScroll:true});
 }
-function submitSetupName(){
+async function submitSetupName(){
  const name=safeName($('setupNameInput').value);
- if(!name){$('setupNameError').textContent='Please use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
- $('setupNameError').textContent='';
- if(name.toLocaleLowerCase('en-US')!==String(store.name).toLocaleLowerCase('en-US'))draftGrade=null;
- draftName=name;setupGoTo(1);sound('tap');
+ if(!name){$('setupNameError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
+ const button=$('setupNameForm').querySelector('button[type="submit"]');
+ button.disabled=true;$('setupNameError').textContent='Checking your nickname…';
+ try{
+  if(!(await nicknameAllowed(name))){$('setupNameError').textContent='This nickname is not allowed. Please choose a friendly name.';return;}
+  $('setupNameError').textContent='';draftGrade=null;draftName=name;setupGoTo(1);sound('tap');
+ }catch(err){console.warn('Name check failed:',err);$('setupNameError').textContent='Nickname check unavailable. Check your internet connection.';}
+ finally{button.disabled=false;}
 }
 function selectDraftGrade(grade){if(![8,9,10].includes(grade))return;draftGrade=grade;
  document.querySelectorAll('[data-select-grade]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.selectGrade===grade)));
