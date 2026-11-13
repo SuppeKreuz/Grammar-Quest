@@ -334,7 +334,7 @@ function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson(
  document.querySelectorAll('[data-grade]').forEach(btn=>btn.setAttribute('aria-selected',String(+btn.dataset.grade===store.grade)));
  const stage=STAGE_BOUNDS[stageIndex(st.level)];$('levelBadge').textContent=st.level>=20?`∞ ENDLESS · LEVEL ${(st.level+1).toLocaleString('en-US')}`:`${stage.name.toUpperCase()} · LEVEL ${st.level-stage.start+1} / ${stage.end-stage.start+1}`;$('topicBadge').textContent=topic.name.toUpperCase();$('levelTitle').textContent=topic.name;
  $('progressText').textContent=st.level>=20?`∞ Endless · Challenge ${(st.level+1).toLocaleString('en-US')}`:`${complete} / ${count} levels`;$('progressFill').style.width=`${Math.min(100,complete/count*100)}%`;$('progressTrack').setAttribute('aria-valuenow',Math.min(20,complete));
- $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=(store.records[`${store.grade}:${playerKey()}`]?.score||st.score).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(Math.max(0,Math.min(5,st.lives)))+'♡'.repeat(Math.max(0,5-st.lives));$('streakValue').textContent=st.streak;
+ $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=Math.max(st.score,personalBestScore()).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(Math.max(0,Math.min(5,st.lives)))+'♡'.repeat(Math.max(0,5-st.lives));$('streakValue').textContent=st.streak;
  $('statsGrade').textContent=`GRADE ${store.grade}`;$('percentValue').textContent=st.level>=20?'∞ Endless Challenge — keep climbing!':`${Math.round(complete/count*100)}% complete`;
  $('wordsRemaining').textContent=`${tokens().length-selection.length} words left`;
  $('tipDescription').textContent=topic.tip;$('tipExample').textContent=topic.example;
@@ -363,40 +363,50 @@ function showRules(){rulesGrade=store.grade;renderRules();$('rulesDialog').showM
 function renderRules(){document.querySelectorAll('[data-rulesgrade]').forEach(b=>b.classList.toggle('active',+b.dataset.rulesgrade===rulesGrade));const grid=$('rulesList');grid.replaceChildren();RULES[rulesGrade].forEach(([name,explanation,example])=>{const article=document.createElement('article');article.className='rule';const h=document.createElement('h3');h.textContent=name;const p=document.createElement('p');p.textContent=explanation;const ex=document.createElement('code');ex.textContent=example;article.append(h,p,ex);grid.appendChild(article);});}
 function openBoard(){boardGrade=store.grade;renderFullBoard();$('leaderDialog').showModal();if(remoteReady&&leaderMode==='online')fetchRemote();}
 function setLeaderMode(next){if(next==='online'&&!remoteReady)return;leaderMode=next;renderLeaderboard();if(next==='online')fetchRemote();}
-async function fetchRemote(){if(!remoteReady)return;leaderLoading=true;renderLeaderboard();try{const url=`${ONLINE_CONFIG.url.replace(/\/$/,'')}/rest/v1/grammar_best_scores?select=player_name,grade,score,levels_completed,best_streak,played_at&order=score.desc&limit=500`;const r=await fetch(url,{headers:{'apikey':ONLINE_CONFIG.anonKey}});if(!r.ok)throw new Error(`HTTP ${r.status}`);onlineRows=(await r.json()).map(r=>({...r,name:r.player_name,completed:r.levels_completed}));}catch(e){toast('Could not load online scores. Check database setup.');console.warn('Online leaderboard:',e);}finally{leaderLoading=false;renderLeaderboard();}}
+function onlineBestScore(name,grade){
+ const key=String(name||'').toLocaleLowerCase('en-US').trim();
+ return onlineRows.filter(r=>+r.grade===+grade&&String(r.name||r.player_name||'').toLocaleLowerCase('en-US').trim()===key).reduce((best,r)=>Math.max(best,Number(r.score)||0),0);
+}
+function personalBestScore(name=store.name,grade=store.grade){
+ const key=String(name||'').toLocaleLowerCase('en-US').trim();
+ return Math.max(Number(store.records[`${grade}:${key}`]?.score)||0,onlineBestScore(name,grade));
+}
+async function fetchRemote(){
+ if(!remoteReady)return;
+ leaderLoading=true;renderLeaderboard();
+ try{
+  const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/grammar_best_scores?select=player_name,grade,score,levels_completed,best_streak,played_at&order=score.desc&limit=500';
+  const response=await fetch(url,{headers:{apikey:ONLINE_CONFIG.anonKey},cache:'no-store'});
+  if(!response.ok)throw new Error('Leaderboard HTTP '+response.status);
+  onlineRows=(await response.json()).map(r=>({...r,name:r.player_name,completed:r.levels_completed}));
+  leaderboardFetched=true;
+ }catch(err){console.warn('Leaderboard unavailable:',err);toast('Online ranking unavailable. Your run continues.');}
+ finally{leaderLoading=false;if(store.name)renderAll();}
+}
 async function postRemoteScore(silent=false){
- if(!remoteReady||!store.name)return;
- const st=game(),complete=st.level+(st.solved?1:0);
- // Preserve the player's highest score in the rankings across any replay.
- if(st.score<(store.records[`${store.grade}:${playerKey()}`]?.score||0))return;
+ if(!remoteReady||!store.name)return false;
+ const st=game(),name=store.name,grade=store.grade,score=Number(st.score),complete=st.level+(st.solved?1:0);
+ if(!Number.isSafeInteger(score)||score<100||score>9007199254740900||score%100!==0)return false;
+ if(!leaderboardFetched){await fetchRemote();if(!leaderboardFetched)return false;}
+ if(name!==store.name||grade!==store.grade)return false;
+ const previous=Math.max(Number(st.startBest)||0,onlineBestScore(name,grade));
+ if(score<=previous)return false;
+ let response;
  if(st.assisted){
-  if(!adminUnlocked||!adminOnlinePassphrase){
-   if(!silent)toast('Unlock the admin console to publish your saved admin score online.');
-   return;
-  }
-  if(!Number.isInteger(st.score)||st.score<100||st.score>100000000||st.score%100!==0){
-   if(!silent)toast('This admin score cannot be published.');
-   return;
-  }
-  const response=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/functions/v1/grammar-admin-score`,{
-   method:'POST',
-   headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
-   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.max(1,complete),best_streak:Math.max(0,Math.min(20,st.bestStreak))})
+  if(!adminUnlocked||!adminOnlinePassphrase){if(!silent)toast('Unlock the Admin console first.');return false;}
+  response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
+   method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
+   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:name,grade,score,levels_completed:Math.max(1,complete),best_streak:Math.max(0,st.bestStreak||0)})
   });
-  if(!response.ok){const error=await response.text();throw new Error('Admin score publish failed: '+response.status+' '+error);}
-  if(!silent)toast('Your score was published online!');
-  leaderMode='online';
-  await fetchRemote();
-  return;
+ }else{
+  response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/grammar_scores',{
+   method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json',Prefer:'return=minimal'},
+   body:JSON.stringify({player_name:name,grade,score,levels_completed:Math.floor(score/100),best_streak:st.bestStreak})
+  });
  }
- if(!Number.isSafeInteger(st.score)||st.score<100||st.score%100!==0)return;
- const r=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/rest/v1/grammar_scores`,{
-  method:'POST',headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json','Prefer':'return=minimal'},
-  body:JSON.stringify({player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.floor(st.score/100),best_streak:st.bestStreak})
- });
- if(!r.ok){const t=await r.text();throw new Error(`${r.status} ${t}`);}
- if(!silent)toast('Your score was published!');
- if(leaderMode==='online')await fetchRemote();
+ if(!response.ok)throw new Error('Score publish failed with HTTP '+response.status);
+ if(!silent)toast('New personal best saved online!');
+ await fetchRemote();return true;
 }
 function openAdmin(){$('adminError').textContent='';$('adminPassword').value='';$('adminLock').hidden=adminUnlocked;$('adminTools').hidden=!adminUnlocked;$('adminStatus').textContent='';if(!$('adminDialog').open)$('adminDialog').showModal();}
 function adminAction(action){if(!adminUnlocked||!store.name)return;const st=game(),scoreBefore=st.score;if(action!=='clear')st.assisted=true;let msg='';if(action==='correct'){if(st.solved){msg='This level is already solved.';}else if(st.lives<=0){msg='Restore lives first.';}else{correct(true);msg='Level auto-solved.';}}
