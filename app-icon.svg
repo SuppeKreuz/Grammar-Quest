@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Grammar Quest">
+<defs><linearGradient id="sea" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#137dea"/><stop offset="1" stop-color="#5dd8ef"/></linearGradient><linearGradient id="wave" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#e6fbff"/><stop offset="1" stop-color="#ccefff"/></linearGradient></defs>
+<rect width="512" height="512" rx="108" fill="url(#sea)"/>
+<circle cx="420" cy="114" r="46" fill="#c0faff" opacity=".38"/>
+<path d="M0 325c86-63 143-63 235-10 77 43 150 25 277-42v239H0Z" fill="#1272c0" opacity=".48"/>
+<path d="M0 387c96-48 174-67 270-27 92 40 145 29 242-22v174H0Z" fill="url(#wave)" opacity=".96"/>
+<rect x="106" y="130" width="300" height="210" rx="56" fill="#ffffff" opacity=".18"/>
+<text x="256" y="275" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="145" fill="#ffffff" letter-spacing="-13">GQ</text>
+<path d="m183 389 35 31 94-73" fill="none" stroke="#1789c6" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

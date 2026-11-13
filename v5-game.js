@@ -28,7 +28,7 @@ window.GrammarQuestModes={
  get:()=>modePreference,
  set:function(mode){
   if(!['mixed','order','choice','gap'].includes(mode))return;
-  modePreference=mode;activeKey='';selected=-1;helpOpen=false;resetTiles();
+  modePreference=mode;activeKey='';selected=-1;helpOpen=false;if(store.name){const st=game();st.mistakes=0;st.lastWrong=null;st.mistakeMode=mode;}resetTiles();
   try{localStorage.setItem('grammar-quest-v5-mode',mode);}catch(e){/* optional */}
   if(store.name)renderGame();
  }
@@ -57,7 +57,7 @@ function buildGap(sentence){
  const opts=[word,...pool.filter(w=>w.toLowerCase()!==low)].filter((w,i,a)=>a.indexOf(w)===i).slice(0,4);
  return {idx,word,options:randomize(opts),prompt:words.map((w,i)=>i===idx?'_______'+w.slice(word.length):w).join(' ')};
 }
-function key(){return playerKey()+':'+store.grade+':'+game().level;}
+function key(){return playerKey()+':'+store.grade+':'+game().level+':'+String(game().runId||'legacy');}
 function refreshChallenge(){
  const now=key();if(now===activeKey)return;
  activeKey=now;activeMode=modeForLevel();selected=-1;helpOpen=false;
@@ -73,8 +73,16 @@ function drawGuide(){
  guide.replaceChildren();const topic=TOPICS[lesson()[0]]||{};
  const heading=document.createElement('strong');heading.textContent='Warum ist das so?';
  const p=document.createElement('p');p.textContent=topic.tip||'Achte auf die Reihenfolge von Subjekt, Verb und Ergänzungen.';
+ const st=game();
+ if(Number(st.mistakes)>=3&&st.lastWrong){
+  const focus=document.createElement('p');focus.className='v7-focused-help';
+  if(st.lastWrong.mode==='order')focus.textContent='Hier liegt der Fehler: '+st.lastWrong.chosen+'. An dieser Stelle gehört '+st.lastWrong.expected+'. Achte auf die Satzstellung und versuche es erneut.';
+  else if(st.lastWrong.mode==='gap')focus.textContent='Du hast „'+st.lastWrong.chosen+'“ ausgewählt. Hier ist „'+st.lastWrong.expected+'“ richtig. Überprüfe die Verbform oder Zeitform.';
+  else focus.textContent='Diese Antwort passt nicht zur englischen Satzstellung. Richtig wäre: '+st.lastWrong.expected+'. Vergleiche Subjekt, Hilfsverb und Hauptverb.';
+  guide.append(heading,focus,p);
+ }else guide.append(heading,p);
  const code=document.createElement('code');code.textContent=topic.example||lesson()[1];
- guide.append(heading,p,code);
+ guide.append(code);
  guide.hidden=!helpOpen;
  helpButton.textContent=helpOpen?'💡 Erklärung ausblenden':'💡 Erklärung anzeigen';
 }
@@ -115,7 +123,7 @@ tryCheck=function(){
  const st=game();
  if(e('playView').hidden||modeForLevel()==='order'||st.solved||st.lives<=0){
   const previous=st.lives;oldTryCheck();
-  if(st.lives<previous){helpOpen=true;drawGuide();}
+  if(st.lives<previous){helpOpen=(Number(st.mistakes)||0)>=3;drawGuide();}
   if(st.solved&&st.lives===previous){helpOpen=false;drawGuide();}
   return;
  }
@@ -123,10 +131,7 @@ tryCheck=function(){
  if(selected<0){notice('info','Choose an answer first.');sound('error');return;}
  const chosen=options[selected],right=activeMode==='choice'?lesson()[1]:gapWord;
  if(chosen===right){helpOpen=false;correct();return;}
- st.lives=Math.max(0,st.lives-1);st.streak=0;persist();helpOpen=true;selected=-1;
- feedback={kind:'error',text:st.lives>0?'Not quite! You lost a life. Read the German explanation below.':'No lives left. Review the explanation and try again.'};
- renderAll();card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');sound('error');
- if(st.lives===0)setTimeout(()=>openResult(false),600);
+ selected=-1;recordWrongAttempt(activeMode,chosen,right);helpOpen=(Number(st.mistakes)||0)>=3;drawGuide();
 };
 e('checkButton').addEventListener('click',event=>{
  if(e('playView').hidden)return;

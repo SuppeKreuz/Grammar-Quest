@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#edf7ff">
-<meta name="description" content="Grammar Quest — a playful English word-order game for grades 8, 9 and 10.">
-<title>Grammar Quest · English Word Order</title>
+<meta name="description" content="Grammar Quest 7 — a friendly English grammar challenge with endless levels, multiple modes and personal bests."><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Grammar Quest"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<title>Grammar Quest 7 · Ocean Arcade Light</title>
 <style>
 :root{--ink:#18304c;--soft:#6f859a;--green:#3199e9;--greenDark:#2179bc;--greenPale:#e0f1ff;--purple:#8065cf;--orange:#ffa83c;--red:#ee6f73;--line:#c8e4f8;--bg:#edf7ff;--white:#fff;--shadow:0 14px 42px rgba(20,68,47,.075)}
 *{box-sizing:border-box}[hidden]{display:none!important}html{scroll-behavior:smooth}body{margin:0;min-width:320px;background:radial-gradient(ellipse 560px 360px at 88% 0%,#e7f4ff 0%,transparent 85%),radial-gradient(ellipse 440px 340px at 6% 6%,#e7f9e9 0%,transparent 80%),var(--bg);color:var(--ink);font-family:Nunito,ui-rounded,"Segoe UI",sans-serif;font-weight:700;line-height:1.4}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8169ed;outline-offset:3px}button:disabled{opacity:.46;cursor:not-allowed!important;transform:none!important}.wrap{width:min(1240px,calc(100% - 48px));margin:auto}
@@ -71,6 +71,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 </style>
 <link rel="stylesheet" href="v5.css">
 <style>.v6-intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pb-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 10px;padding:10px 12px;border:2px solid var(--surface-line);border-radius:13px;background:var(--accent-pale);color:var(--primary-text);font-size:12px;font-weight:1000}.pb-summary strong{color:var(--accent-deep);white-space:nowrap}@media(max-width:640px){.v6-intro-actions{width:100%}.v6-intro-actions .btn{flex:1}}</style>
+<link rel="stylesheet" href="v7.css">
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -88,7 +89,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <div class="setup-progress-step" data-setup-indicator="2" role="listitem"><span class="setup-dot">3</span><span>Difficulty</span></div>
  </div>
  <section class="setup-card panel" id="setupPage0" data-setup-page="0" aria-labelledby="setupNameHeading">
-  <div class="setup-illustration" aria-hidden="true">👋</div><span class="setup-kicker">STEP 1 OF 3 · PLAYER</span><h2 id="setupNameHeading">What's your name?</h2><p>Choose a nickname for your progress and leaderboard scores.</p>
+  <div class="setup-illustration" aria-hidden="true">👋</div><span class="setup-kicker">STEP 1 OF 3 · PLAYER</span><h2 id="setupNameHeading">What's your name?</h2><p>Choose a friendly nickname. Each player starts at 0 XP; only the best score stays.</p>
   <form id="setupNameForm" novalidate>
    <label class="form-field" for="setupNameInput">Player name</label>
    <input id="setupNameInput" class="text-input setup-text-input" maxlength="20" autocomplete="nickname" placeholder="Your nickname" required>
@@ -112,7 +113,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <div class="setup-stage-note" id="setupStageNote" role="status"></div>
   <div class="setup-actions"><button id="setupBackToGrade" class="btn light" type="button">← Back</button><button id="setupStart" class="btn green setup-next" type="button">Start playing →</button></div>
  </section>
- <div class="setup-footer"><span>✦</span> Your progress is saved on this device · <button type="button" id="setupRules">Grammatikregeln ansehen</button></div>
+ <div class="setup-footer"><span>✦</span> Your personal best is saved, and each name starts a fresh run · <button type="button" id="setupRules">Grammatikregeln ansehen</button></div>
 </section>
 <div id="playView" hidden>
 <section class="play-intro"><div><span class="eyebrow">✦ LET'S PRACTISE!</span><h1>You're on your way, <span id="playPlayer">player</span>!</h1><p id="playJourney">Grade 8 · Easy path</p></div><div class="v6-intro-actions"><button id="startNewRun" type="button" class="btn light">↻ New run · keep best</button><button id="changeChoices" type="button" class="btn light">↶ Change choices</button></div></section>
@@ -139,7 +140,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
    <div class="feedback" role="status" id="feedback"><span class="feedback-symbol">✓</span><span class="feedback-text"></span></div>
   </article></div>
   <aside class="right" aria-label="Game information">
-   <section class="panel stats"><div class="cardhead"><h3>⚡ Your stats</h3><small id="statsGrade">GRADE 8</small></div><div class="stats-grid"><div class="stat"><span>Current run</span><strong class="gold" id="scoreValue">0</strong></div><div class="stat"><span>Lives</span><strong class="heart" id="livesValue">♥♥♥</strong></div><div class="stat"><span>Streak</span><strong class="fire" id="streakValue">0</strong></div></div><div class="pb-summary"><span>🏆 Personal best</span><strong id="personalBestValue">0 XP</strong></div><div class="mini-progress"><span>YOUR LEARNING PATH</span><strong id="percentValue">0% complete</strong></div><div class="level-dots" id="levelDots" aria-label="Level map"></div></section>
+   <section class="panel stats"><div class="cardhead"><h3>⚡ Your stats</h3><small id="statsGrade">GRADE 8</small></div><div class="stats-grid"><div class="stat"><span>Current run</span><strong class="gold" id="scoreValue">0</strong></div><div class="stat"><span>Lives</span><strong class="heart" id="livesValue">♥♥♥♥♥</strong></div><div class="stat"><span>Streak</span><strong class="fire" id="streakValue">0</strong></div></div><div class="pb-summary"><span>🏆 Personal best</span><strong id="personalBestValue">0 XP</strong></div><div class="mini-progress"><span>YOUR LEARNING PATH</span><strong id="percentValue">0% complete</strong></div><div class="level-dots" id="levelDots" aria-label="Level map"></div></section>
    <section class="panel leadercard"><div class="leader-top"><div class="cardhead"><h3>🏆 Top players</h3><small id="leaderGrade">GRADE 8</small></div><p id="leaderScopeText">This browser · Grade 8</p></div><div class="leaderboard" id="miniLeaderboard"></div><div class="leader-actions"><button class="tiny active" type="button" id="localButton">Local</button><button class="tiny" type="button" id="onlineButton" hidden>Online</button><button class="tiny rightmost" type="button" id="fullBoardButton">View all →</button></div></section>
    <section class="panel tipcard"><div class="tip-top"><span class="tipicon">💡</span><div><h3>Dein Tipp</h3><small>GRAMMATIK-HILFE</small></div></div><p id="tipDescription"></p><code id="tipExample"></code></section>
   </aside>
@@ -256,9 +257,9 @@ const RULES={
 ]};
 const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
-const freshState=()=>({level:0,score:0,lives:3,streak:0,bestStreak:0,solved:false});
+const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0,runId:Date.now()+Math.random()});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
-let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
+let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,leaderboardFetched=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
 if(remoteReady) leaderMode='online';
 function readStore(){try{const parsed=JSON.parse(localStorage.getItem(STORAGE)||'null');if(parsed&&typeof parsed==='object'){store={...store,...parsed};if(![8,9,10].includes(+store.grade))store.grade=8;if(!store.profiles||typeof store.profiles!=='object')store.profiles={};if(!store.records||typeof store.records!=='object')store.records={};if(typeof store.motion!=='boolean')store.motion=true;if(!['presets','custom'].includes(store.designMode))store.designMode='presets';if(!Object.keys(PRESETS).includes(store.preset))store.preset='ocean';if(!store.custom||typeof store.custom!=='object')store.custom={...CUSTOM_DEFAULT};store.custom={...CUSTOM_DEFAULT,...store.custom};for(const k of ['accent','bg','surface','ink'])if(!colorValid(store.custom[k]))store.custom[k]=CUSTOM_DEFAULT[k];if(!Number.isFinite(+store.custom.radius))store.custom.radius=24;store.custom.radius=Math.max(6,Math.min(36,Math.round(+store.custom.radius)));if(!['rounded','classic','mono'].includes(store.custom.font))store.custom.font='rounded';if(!['glow','dots','grid','plain'].includes(store.custom.pattern))store.custom.pattern='glow';}}catch(err){console.warn('Local storage unavailable',err);}}
@@ -272,6 +273,20 @@ function shuffle(ids){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.ra
 function tokens(){return lesson()[1].split(' ').map((word,id)=>({word,id}));}
 function resetTiles(){selection=[];tileOrder=shuffle(tokens().map(t=>t.id));feedback=null;}
 function safeName(raw){const value=raw.trim().replace(/\s+/g,' ');if(value.length<2||value.length>20||!/^[\p{L}\p{N}_ -]+$/u.test(value))return null;return value;}
+function quickNicknameCheck(name){
+ const leet={'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','@':'a','$':'s','!':'i','ä':'a','ö':'o','ü':'u','ß':'s'};
+ const normalized=name.toLocaleLowerCase('en-US').replace(/[013457@$!äöüß]/g,c=>leet[c]||c).replace(/[^a-z0-9]/g,'');
+ const denied=['fuck','shit','bitch','cunt','nigger','nigga','nazi','hitler','hurensohn','arschloch','wichser','fotze','scheise','scheisse','schlampe','hure','spasti','kike','verpiss','retard'];
+ return normalized.length>=2&&!denied.some(word=>normalized.includes(word));
+}
+async function nicknameAllowed(name){
+ if(!quickNicknameCheck(name))return false;
+ if(!remoteReady||!navigator.onLine)return true; // Offline practice still enforces the local basic list.
+ const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score';
+ const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({action:'check-name',input_name:name})});
+ if(!response.ok)throw new Error('Name check failed: '+response.status);
+ return (await response.json()).allowed===true;
+}
 function setName(name){store.name=name;ensureProfile();persist();resetTiles();renderAll();}
 function profileDialog(force=false){$('profileError').textContent='';$('nameInput').value=store.name;$('profileClose').hidden=force;$('profileDialog').dataset.force=String(force);$('profileDialog').showModal();setTimeout(()=>$('nameInput').focus(),20);}
 function closeDialog(id){const dialog=$(id);if(dialog.open)dialog.close();}
@@ -281,12 +296,38 @@ function notice(kind,text){feedback={kind,text};renderGame();}
 function updateRecords(){const st=game(),k=`${store.grade}:${playerKey()}`,old=store.records[k];const complete=Math.max(st.level+(st.solved?1:0),Math.floor(st.score/100));if(!old||st.score>old.score||(st.score===old.score&&complete>old.completed)){store.records[k]={name:store.name,grade:store.grade,score:st.score,completed:complete,bestStreak:st.bestStreak,assisted:Boolean(st.assisted),updatedAt:new Date().toISOString()};}persist();}
 function correct(auto=false){const st=game();if(st.lives<=0||st.solved)return;if(!Number.isSafeInteger(st.score)||st.score>Number.MAX_SAFE_INTEGER-100)return;
  if(auto)selection=tokens().map(t=>t.id);
+ st.mistakes=0;st.lastWrong=null;
  st.score+=100;st.streak++;st.bestStreak=Math.max(st.bestStreak,st.streak);st.solved=true;feedback={kind:'success',text:auto?'Admin auto-solve! +100 points.':'Amazing! That sentence is correct. +100 points!'};
  updateRecords();renderAll();pointFloat();sound('success');burstAt($('checkButton'));if(remoteReady&&!st.assisted)postRemoteScore(true).catch(console.warn);if(st.level===19){confetti(65);toast('Classic path complete! Endless Challenge is unlocked!');}else if(STAGE_BOUNDS.some(s=>s.end===st.level)){confetti(28);setTimeout(showStageComplete,700);}
 }
-function tryCheck(){const st=game();if(!store.name){profileDialog(true);return;}if(st.lives<=0){openResult(false);return;}if(st.solved){advanceLevel();return;}
- const words=tokens();if(selection.length!==words.length){notice('info',`Choose all ${words.length} words before checking.`);sound('error');return;}
- const answer=selection.map(id=>words[id].word).join(' ');if(answer===lesson()[1])correct();else{st.lives--;st.streak=0;persist();if(st.lives===0){feedback={kind:'error',text:'No lives left. Keep practising and try again!'};renderAll();sound('error');setTimeout(()=>openResult(false),550);}else{resetTiles();feedback={kind:'error',text:`Not quite! You lost a life. ${st.lives} ${st.lives===1?'life':'lives'} remaining.`};renderAll();$('gameCard').classList.remove('shake');void $('gameCard').offsetWidth;$('gameCard').classList.add('shake');sound('error');}}}
+function recordWrongAttempt(mode,chosen,expected){
+ const st=game();
+ if(st.mistakeLevel!==st.level||st.mistakeMode!==mode){st.mistakes=0;st.mistakeLevel=st.level;st.mistakeMode=mode;}
+ st.mistakes=(Number(st.mistakes)||0)+1;
+ st.lastWrong={mode,chosen:String(chosen||'').slice(0,250),expected:String(expected||'').slice(0,250)};
+ st.lives=Math.max(0,st.lives-1);st.streak=0;
+ const n=st.mistakes;
+ const message=st.lives===0?'No lives left. Your personal best is safe.':
+  n>=3?`You've made ${n} mistakes on this question. Read the German explanation below, then try again!`:
+  `Not quite! One life lost. ${st.lives} lives left.`;
+ resetTiles();feedback={kind:'error',text:message};persist();renderAll();sound('error');
+ const card=$('gameCard');card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');
+ if(st.lives===0)setTimeout(()=>openResult(false),700);
+}
+function tryCheck(){
+ const st=game();if(!store.name){profileDialog(true);return;}
+ if(st.lives<=0){openResult(false);return;}
+ if(st.solved){advanceLevel();return;}
+ const words=tokens();
+ if(selection.length!==words.length){notice('info',`Choose all ${words.length} words before checking.`);sound('error');return;}
+ const answer=selection.map(id=>words[id].word).join(' ');
+ if(answer===lesson()[1]){correct();return;}
+ const expected=lesson()[1].split(' '),actual=answer.split(' ');
+ const first=actual.findIndex((w,i)=>w!==expected[i]);
+ const detail=first>=0?`Position ${first+1}: "${actual[first]}"`:'Wrong word order';
+ const wanted=first>=0?`Position ${first+1}: "${expected[first]}"`:lesson()[1];
+ recordWrongAttempt('order',detail,wanted);
+}
 function resetSentence(){if(game().solved||game().lives<=0)return;resetTiles();renderGame();sound('tap');}
 function undo(){if(!selection.length||game().solved||game().lives<=0)return;selection.pop();feedback=null;renderGame();sound('tap');}
 function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson()[0]],count=levels().length,complete=st.level+(st.solved?1:0);updatePlayIntro();
@@ -294,7 +335,7 @@ function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson(
  document.querySelectorAll('[data-grade]').forEach(btn=>btn.setAttribute('aria-selected',String(+btn.dataset.grade===store.grade)));
  const stage=STAGE_BOUNDS[stageIndex(st.level)];$('levelBadge').textContent=st.level>=20?`∞ ENDLESS · LEVEL ${(st.level+1).toLocaleString('en-US')}`:`${stage.name.toUpperCase()} · LEVEL ${st.level-stage.start+1} / ${stage.end-stage.start+1}`;$('topicBadge').textContent=topic.name.toUpperCase();$('levelTitle').textContent=topic.name;
  $('progressText').textContent=st.level>=20?`∞ Endless · Challenge ${(st.level+1).toLocaleString('en-US')}`:`${complete} / ${count} levels`;$('progressFill').style.width=`${Math.min(100,complete/count*100)}%`;$('progressTrack').setAttribute('aria-valuenow',Math.min(20,complete));
- $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=(store.records[`${store.grade}:${playerKey()}`]?.score||st.score).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(st.lives)+'♡'.repeat(3-st.lives);$('streakValue').textContent=st.streak;
+ $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=Math.max(st.score,personalBestScore()).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(Math.max(0,Math.min(5,st.lives)))+'♡'.repeat(Math.max(0,5-st.lives));$('streakValue').textContent=st.streak;
  $('statsGrade').textContent=`GRADE ${store.grade}`;$('percentValue').textContent=st.level>=20?'∞ Endless Challenge — keep climbing!':`${Math.round(complete/count*100)}% complete`;
  $('wordsRemaining').textContent=`${tokens().length-selection.length} words left`;
  $('tipDescription').textContent=topic.tip;$('tipExample').textContent=topic.example;
@@ -313,7 +354,7 @@ function renderLeaderboard(){if(!store.name)return;const rows=getRows(store.grad
 function renderFullBoard(){const board=$('fullLeaderboard');board.replaceChildren();document.querySelectorAll('[data-boardgrade]').forEach(b=>b.classList.toggle('active',+b.dataset.boardgrade===boardGrade));const rows=getRows(boardGrade);$('leaderDialogScope').textContent=`${leaderMode==='online'?'Online leaderboard':'Scores on this device'} · Grade ${boardGrade}`;$('onlineInfo').textContent=remoteReady?'Online scores are shared across devices. Player names are public; please use a nickname.':'Scores are saved only in this browser. Set up the optional database to enable a shared online leaderboard.';$('submitOnline').hidden=!remoteReady;if(!rows.length){const p=document.createElement('p');p.className='leader-empty';p.textContent='No scores yet. Start a challenge!';board.appendChild(p);}else rows.slice(0,100).forEach((row,i)=>board.appendChild(rankNode(row,i)));}
 function renderAll(){if(!store.name)return;$('profileName').textContent=store.name;$('avatar').textContent=store.name[0].toUpperCase();$('soundToggle').textContent=store.sound?'♫':'♪̸';$('soundToggle').title=store.sound?'Turn sounds off':'Turn sounds on';$('soundToggle').setAttribute('aria-pressed',String(store.sound));renderGame();renderLeaderboard();}
 function openResult(win){if($('resultDialog').open)return;const st=game();$('resultBadge').textContent=win?'★':'♡';$('resultBadge').style.background=win?'#e5f9e7':'#fff2ef';$('resultBadge').style.color=win?'#3db768':'#e78283';$('resultEyebrow').textContent=win?'YOU DID IT!':'KEEP GOING!';$('resultHeading').textContent=win?`Grade ${store.grade} complete!`:'Out of lives!';$('resultCopy').textContent=win?`You mastered Easy, Medium and Hard — all 20 Grade ${store.grade} challenges!` :'This run is over. Your personal best stays saved in the leaderboard — start again and beat it!';$('resultScore').textContent=st.score.toLocaleString('en-US');$('resultDialog').showModal();if(remoteReady)postRemoteScore(true).catch(console.warn);}
-function restartGrade(){store.profiles[playerKey()][store.grade]=freshState();persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
+function restartGrade(){const rec=store.records[`${store.grade}:${playerKey()}`];const online=onlineRows.filter(r=>+r.grade===store.grade&&String(r.name||r.player_name).toLocaleLowerCase('en-US')===playerKey()).reduce((n,r)=>Math.max(n,Number(r.score)||0),0);store.profiles[playerKey()][store.grade]={...freshState(),startBest:Math.max(Number(rec?.score)||0,online)};persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
 function pointFloat(){if(!motionAllowed())return;const el=document.createElement('span');el.className='float-point';el.textContent='+100 XP';$('gameCard').appendChild(el);setTimeout(()=>el.remove(),1250);}
 function confetti(amount=65){if(!motionAllowed())return;const colors=['#4bc575','#8f73d9','#ffbb4e','#6bbcf0','#ef7c91'];for(let i=0;i<amount;i++){const el=document.createElement('span');el.className='confetti';el.style.left=`${Math.random()*100}vw`;el.style.background=colors[i%colors.length];el.style.animationDelay=`${Math.random()*.6}s`;el.style.setProperty('--dur',`${2.5+Math.random()*1.8}s`);el.style.setProperty('--dx',`${Math.random()*250-125}px`);el.style.setProperty('--rot',`${Math.random()*900-450}deg`);document.body.appendChild(el);setTimeout(()=>el.remove(),5100);}}
 function toast(text){const el=$('toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2500);}
@@ -323,45 +364,55 @@ function showRules(){rulesGrade=store.grade;renderRules();$('rulesDialog').showM
 function renderRules(){document.querySelectorAll('[data-rulesgrade]').forEach(b=>b.classList.toggle('active',+b.dataset.rulesgrade===rulesGrade));const grid=$('rulesList');grid.replaceChildren();RULES[rulesGrade].forEach(([name,explanation,example])=>{const article=document.createElement('article');article.className='rule';const h=document.createElement('h3');h.textContent=name;const p=document.createElement('p');p.textContent=explanation;const ex=document.createElement('code');ex.textContent=example;article.append(h,p,ex);grid.appendChild(article);});}
 function openBoard(){boardGrade=store.grade;renderFullBoard();$('leaderDialog').showModal();if(remoteReady&&leaderMode==='online')fetchRemote();}
 function setLeaderMode(next){if(next==='online'&&!remoteReady)return;leaderMode=next;renderLeaderboard();if(next==='online')fetchRemote();}
-async function fetchRemote(){if(!remoteReady)return;leaderLoading=true;renderLeaderboard();try{const url=`${ONLINE_CONFIG.url.replace(/\/$/,'')}/rest/v1/grammar_best_scores?select=player_name,grade,score,levels_completed,best_streak,played_at&order=score.desc&limit=500`;const r=await fetch(url,{headers:{'apikey':ONLINE_CONFIG.anonKey}});if(!r.ok)throw new Error(`HTTP ${r.status}`);onlineRows=(await r.json()).map(r=>({...r,name:r.player_name,completed:r.levels_completed}));}catch(e){toast('Could not load online scores. Check database setup.');console.warn('Online leaderboard:',e);}finally{leaderLoading=false;renderLeaderboard();}}
+function onlineBestScore(name,grade){
+ const key=String(name||'').toLocaleLowerCase('en-US').trim();
+ return onlineRows.filter(r=>+r.grade===+grade&&String(r.name||r.player_name||'').toLocaleLowerCase('en-US').trim()===key).reduce((best,r)=>Math.max(best,Number(r.score)||0),0);
+}
+function personalBestScore(name=store.name,grade=store.grade){
+ const key=String(name||'').toLocaleLowerCase('en-US').trim();
+ return Math.max(Number(store.records[`${grade}:${key}`]?.score)||0,onlineBestScore(name,grade));
+}
+async function fetchRemote(){
+ if(!remoteReady)return;
+ leaderLoading=true;renderLeaderboard();
+ try{
+  const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/grammar_best_scores?select=player_name,grade,score,levels_completed,best_streak,played_at&order=score.desc&limit=500';
+  const response=await fetch(url,{headers:{apikey:ONLINE_CONFIG.anonKey},cache:'no-store'});
+  if(!response.ok)throw new Error('Leaderboard HTTP '+response.status);
+  onlineRows=(await response.json()).map(r=>({...r,name:r.player_name,completed:r.levels_completed}));
+  leaderboardFetched=true;
+ }catch(err){console.warn('Leaderboard unavailable:',err);toast('Online ranking unavailable. Your run continues.');}
+ finally{leaderLoading=false;if(store.name)renderAll();}
+}
 async function postRemoteScore(silent=false){
- if(!remoteReady||!store.name)return;
- const st=game(),complete=st.level+(st.solved?1:0);
- // Preserve the player's highest score in the rankings across any replay.
- if(st.score<(store.records[`${store.grade}:${playerKey()}`]?.score||0))return;
+ if(!remoteReady||!store.name)return false;
+ const st=game(),name=store.name,grade=store.grade,score=Number(st.score),complete=st.level+(st.solved?1:0);
+ if(!Number.isSafeInteger(score)||score<100||score>9007199254740900||score%100!==0)return false;
+ if(!leaderboardFetched){await fetchRemote();if(!leaderboardFetched)return false;}
+ if(name!==store.name||grade!==store.grade)return false;
+ const previous=Math.max(Number(st.startBest)||0,onlineBestScore(name,grade));
+ if(score<=previous)return false;
+ let response;
  if(st.assisted){
-  if(!adminUnlocked||!adminOnlinePassphrase){
-   if(!silent)toast('Unlock the admin console to publish your saved admin score online.');
-   return;
-  }
-  if(!Number.isInteger(st.score)||st.score<100||st.score>100000000||st.score%100!==0){
-   if(!silent)toast('This admin score cannot be published.');
-   return;
-  }
-  const response=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/functions/v1/grammar-admin-score`,{
-   method:'POST',
-   headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
-   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.max(1,complete),best_streak:Math.max(0,Math.min(20,st.bestStreak))})
+  if(!adminUnlocked||!adminOnlinePassphrase){if(!silent)toast('Unlock the Admin console first.');return false;}
+  response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score',{
+   method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},
+   body:JSON.stringify({passphrase:adminOnlinePassphrase,player_name:name,grade,score,levels_completed:Math.max(1,complete),best_streak:Math.max(0,st.bestStreak||0)})
   });
-  if(!response.ok){const error=await response.text();throw new Error('Admin score publish failed: '+response.status+' '+error);}
-  if(!silent)toast('Your score was published online!');
-  leaderMode='online';
-  await fetchRemote();
-  return;
+ }else{
+  response=await fetch(ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/grammar_scores',{
+   method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json',Prefer:'return=minimal'},
+   body:JSON.stringify({player_name:name,grade,score,levels_completed:Math.floor(score/100),best_streak:st.bestStreak})
+  });
  }
- if(!Number.isSafeInteger(st.score)||st.score<100||st.score%100!==0)return;
- const r=await fetch(`${ONLINE_CONFIG.url.replace(/\/$/,'')}/rest/v1/grammar_scores`,{
-  method:'POST',headers:{'apikey':ONLINE_CONFIG.anonKey,'Content-Type':'application/json','Prefer':'return=minimal'},
-  body:JSON.stringify({player_name:store.name,grade:store.grade,score:st.score,levels_completed:Math.floor(st.score/100),best_streak:st.bestStreak})
- });
- if(!r.ok){const t=await r.text();throw new Error(`${r.status} ${t}`);}
- if(!silent)toast('Your score was published!');
- if(leaderMode==='online')await fetchRemote();
+ if(!response.ok)throw new Error('Score publish failed with HTTP '+response.status);
+ if(!silent)toast('New personal best saved online!');
+ await fetchRemote();return true;
 }
 function openAdmin(){$('adminError').textContent='';$('adminPassword').value='';$('adminLock').hidden=adminUnlocked;$('adminTools').hidden=!adminUnlocked;$('adminStatus').textContent='';if(!$('adminDialog').open)$('adminDialog').showModal();}
 function adminAction(action){if(!adminUnlocked||!store.name)return;const st=game(),scoreBefore=st.score;if(action!=='clear')st.assisted=true;let msg='';if(action==='correct'){if(st.solved){msg='This level is already solved.';}else if(st.lives<=0){msg='Restore lives first.';}else{correct(true);msg='Level auto-solved.';}}
  else if(action==='bonus'){st.score+=500;updateRecords();msg='+500 points added.';}
- else if(action==='lives'){st.lives=3;msg='All lives restored.';}
+ else if(action==='lives'){st.lives=5;msg='All five lives restored.';}
  else if(action==='next'){if(st.level<Number.MAX_SAFE_INTEGER-2){st.level++;st.solved=false;resetTiles();msg='Next level unlocked.';}else msg='Already at the final level.';}
  else if(action==='unlock'){const next=STAGE_BOUNDS.find(s=>s.start>st.level);if(next){st.level=next.start;st.solved=false;resetTiles();msg=`${next.name} stage unlocked (admin).`;}else msg='Already at the final stage.';}
  else if(action==='win'){st.level=Math.max(st.level,19);st.solved=true;st.score=Math.max(st.score,2000);st.lives=Math.max(st.lives,1);resetTiles();selection=tokens().map(t=>t.id);updateRecords();msg='Grade marked complete!';confetti();}
@@ -409,7 +460,7 @@ function renderPath(){
  const current=STAGE_BOUNDS[Math.min(2,stageIndex(game().level))];
  $('pathFootText').textContent=count===20?'All three stages complete — the endless challenge has started!':`${current.name} · ${Math.min(count-current.start,current.end-current.start+1)} / ${current.end-current.start+1} challenges cleared`;
 }
-function advanceLevel(){const st=game();if(!st.solved||st.level>=Number.MAX_SAFE_INTEGER-2)return;st.level++;st.solved=false;persist();resetTiles();renderAll();entrance();sound('tap');}
+function advanceLevel(){const st=game();if(!st.solved||st.level>=Number.MAX_SAFE_INTEGER-2)return;st.level++;st.solved=false;st.mistakes=0;st.lastWrong=null;st.mistakeLevel=st.level;persist();resetTiles();renderAll();entrance();sound('tap');}
 function entrance(){if(!motionAllowed())return;const card=$('gameCard');card.classList.remove('level-enter');void card.offsetWidth;card.classList.add('level-enter');}
 function showStageComplete(){const st=game(),stage=STAGE_BOUNDS.find(s=>s.end===st.level);if(!stage||stage.key==='hard'||!st.solved)return;
  if([...document.querySelectorAll('dialog')].some(d=>d.open)){toast(`${stage.name} completed! Next stage unlocked.`);return;}
@@ -470,13 +521,13 @@ function changeCustom(key,value){store.custom[key]=value;store.designMode='custo
 let setupStep=0,draftName='',draftGrade=null,draftStage=0;
 function draftProgress(){
  const key=String(draftName).toLocaleLowerCase('en-US').trim();
- const st=store.profiles?.[key]?.[draftGrade]||freshState();
+ const st=freshState(); // Nickname entry always starts a new run; existing records are never reset.
  const count=Math.min(20,st.level+(st.solved?1:0));
  const active=Math.min(2,stageIndex(Math.min(19,count)));
  return {st,count,active};
 }
 function enterSetup(step=0){
- draftName=store.name||'';draftGrade=store.name?store.grade:null;
+ draftName=step===0?'':store.name||'';draftGrade=step===0?null:(store.name?store.grade:null);
  draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';
  closeDialog('resultDialog');closeDialog('stageDialog');
  $('playView').hidden=true;$('setupView').hidden=false;
@@ -496,12 +547,16 @@ function setupGoTo(step){
  if(setupStep===0)$('setupNameInput').focus({preventScroll:true});
  else document.querySelector(`#setupPage${setupStep} h2`)?.focus?.({preventScroll:true});
 }
-function submitSetupName(){
+async function submitSetupName(){
  const name=safeName($('setupNameInput').value);
- if(!name){$('setupNameError').textContent='Please use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
- $('setupNameError').textContent='';
- if(name.toLocaleLowerCase('en-US')!==String(store.name).toLocaleLowerCase('en-US'))draftGrade=null;
- draftName=name;setupGoTo(1);sound('tap');
+ if(!name){$('setupNameError').textContent='Use 2–20 letters, numbers, spaces, underscores or hyphens.';$('setupNameInput').focus();return;}
+ const button=$('setupNameForm').querySelector('button[type="submit"]');
+ button.disabled=true;$('setupNameError').textContent='Checking your nickname…';
+ try{
+  if(!(await nicknameAllowed(name))){$('setupNameError').textContent='This nickname is not allowed. Please choose a friendly name.';return;}
+  $('setupNameError').textContent='';draftGrade=null;draftName=name;setupGoTo(1);sound('tap');
+ }catch(err){console.warn('Name check failed:',err);$('setupNameError').textContent='Nickname check unavailable. Check your internet connection.';}
+ finally{button.disabled=false;}
 }
 function selectDraftGrade(grade){if(![8,9,10].includes(grade))return;draftGrade=grade;
  document.querySelectorAll('[data-select-grade]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.selectGrade===grade)));
@@ -527,17 +582,17 @@ function renderSetupStages(){
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
  const {st,count,active}=draftProgress();
- if(st.lives<=0){
-  if(!confirm('Start a new run with 0 XP? Your personal best will stay on the leaderboard.'))return;
-  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()]??={};
-  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()][draftGrade]=freshState();
- }
+ const key=String(draftName).toLocaleLowerCase('en-US').trim();
+ store.profiles[key]??={};
+ const localBest=Number(store.records[`${draftGrade}:${key}`]?.score)||0;
+ const onlineBest=onlineRows.filter(r=>+r.grade===draftGrade&&String(r.name||r.player_name).toLocaleLowerCase('en-US')===key).reduce((n,r)=>Math.max(n,Number(r.score)||0),0);
+ store.profiles[key][draftGrade]={...freshState(),startBest:Math.max(localBest,onlineBest)};
  store.name=draftName;store.grade=draftGrade;boardGrade=draftGrade;rulesGrade=draftGrade;leaderMode=remoteReady?'online':'local';
  ensureProfile();
  // Show saved admin scores in the local leaderboard after re-entering the game.
  // Admin-assisted scores now appear on the shared online board after publishing.
  // A solved final level of an earlier stage is carried forward into the next stage.
- const current=game();if(current.solved&&current.lives>0){current.level++;current.solved=false;}
+ const current=game(); // A new nickname entry never resumes another child's session.
  persist();resetTiles();renderAll();
  $('setupView').hidden=true;$('playView').hidden=false;
  $('playPlayer').textContent=store.name;
@@ -615,11 +670,13 @@ $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){$('adminLo
 document.querySelectorAll('[data-admin]').forEach(b=>b.addEventListener('click',()=>adminAction(b.dataset.admin)));
 $('brandButton').addEventListener('click',()=>{brandClicks++;if(brandClicks>=7){brandClicks=0;openAdmin();}});
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();openAdmin();return;}if([...document.querySelectorAll('dialog')].some(d=>d.open)||$('playView').hidden)return;if(e.target instanceof HTMLElement&&['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName))return;if(e.key==='Backspace'){e.preventDefault();undo();}if(e.key==='Enter'){e.preventDefault();tryCheck();}});
-readStore();applyTheme();renderSettings();ensureProfile();resetTiles();if(store.name)renderAll();enterSetup(0);
+readStore();store.name='';applyTheme();renderSettings();resetTiles();enterSetup(0);
 </script>
 <script src="v5-design.js"></script>
 <script src="v5-game.js"></script>
 <script src="v5-hub.js"></script>
 <script src="v5-weekly.js"></script>
+<script src="v7-admin.js"></script>
+<script src="v7-ui.js"></script>
 </body>
 </html>
