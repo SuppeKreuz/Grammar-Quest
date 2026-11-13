@@ -25,6 +25,7 @@ const BADGES=[
  {id:'hard',name:'Grammar Master',art:'👑',description:'Complete the Hard path in any grade.'},
  {id:'perfect',name:'Perfect Run',art:'💎',description:'Finish a grade with all five lives.'},
  {id:'endless30',name:'Endless Explorer',art:'🌊',description:'Complete 30 levels in one run.'},
+ {id:'collector',name:'Collector (Legacy)',art:'🎒',description:'You earned this badge before the shop closed.'},
  {id:'triple',name:'Triple Crown',art:'🏅',description:'Finish grades 8, 9 and 10.'}
 ];
 let db={players:{}};
@@ -242,9 +243,10 @@ function drawShop(){
 function drawBadges(){
  const body=$h('v5BadgeDialogBody');body.replaceChildren();
  const p=wallet();if(!p)return;
- const text=document.createElement('p');text.className='v5-ranking-context';text.textContent='Unlocked '+p.badges.length+' of '+BADGES.length+' badges · Badges stay saved on this tablet; no account required.';
+ const visibleBadges=BADGES.filter(b=>b.id!=='collector'||p.badges.includes('collector'));
+ const text=document.createElement('p');text.className='v5-ranking-context';text.textContent='Unlocked '+visibleBadges.filter(b=>p.badges.includes(b.id)).length+' of '+visibleBadges.length+' badges · Badges stay saved on this tablet; no account required.';
  const grid=document.createElement('div');grid.className='v5-badges-grid';
- for(const badge of BADGES){
+ for(const badge of visibleBadges){
   const unlocked=p.badges.includes(badge.id);
   const card=document.createElement('article');card.className='v5-badge-card '+(unlocked?'unlocked':'locked');
   const art=document.createElement('span');art.className='art';art.textContent=unlocked?badge.art:'🔒';
