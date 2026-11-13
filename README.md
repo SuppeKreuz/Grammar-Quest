@@ -1,89 +1,81 @@
-# Grammar Quest 6.0
+# Grammar Quest 7.0 – Ocean Arcade Light
 
-**Englische Grammatik lernen, Punkte sammeln und deinen persönlichen Rekord knacken – ohne festes letztes Level.**
+**[Grammar Quest öffnen](https://suppekreuz.github.io/Grammar-Quest/)**
 
-**[Grammar Quest spielen](https://suppekreuz.github.io/Grammar-Quest/)**
+Ein kostenloses Englisch-Grammatikspiel für **Klasse 8–10**, optimiert für iPads, Tablets, Smartphones und Desktop. Das Spielprinzip aus Version 6 bleibt erhalten: 20 klassische Level pro Klasse und anschließend immer neue Aufgaben in der **Endless Challenge**.
 
-Grammar Quest ist ein kostenloses Browser-Lernspiel für die **Klassen 8 bis 10**. Es läuft auf Desktop, Tablet und Smartphone.
+## Das ist neu
 
-## Neu in Version 6.0: Endless Challenge
+- **Ocean Arcade Light:** Komplett überarbeitete Tablet-Oberfläche mit großen Touch-Flächen, kompakter Spielansicht, vier großen Statistikanzeigen und einer festen Navigation: Home, Levels und Ranking. Anpassbare Farbschemata aus dem bisherigen Design-Lab bleiben verfügbar.
+- **Vier Spielmodi bleiben erhalten:** Word Order, Multiple Choice, Fill the Gap und Mixed Mode. Der Modus kann im Spiel umgeschaltet werden.
+- **Fünf Leben:** Jeder neue Durchlauf beginnt mit 5 Herzen. Jede falsche Lösung kostet 1 Leben; bei 0 Leben endet der Run.
+- **Gezielte Lernhilfe:** Nach dem **dritten Fehler bei derselben Aufgabe** wird automatisch eine deutschsprachige Erklärung eingeblendet, die auf die falsche Auswahl beziehungsweise Wortposition eingeht. Hilfen können auch vorher manuell angefordert werden.
+- **Jede Namenseingabe beginnt einen neuen Run bei 0 XP.** Es gibt keine Registrierung oder persönlichen Benutzerkonten. Ein vorhandener Name darf erneut verwendet werden.
+- **Persönlicher Rekord:** In der lokalen und öffentlichen Rangliste zählt weiterhin **nur der höchste Wert pro Name und Klassenstufe**. Ein neuer Run überschreibt den Rekord nicht; erst mehr XP ergeben eine Verbesserung. Beim Wiederholen sind die neuen Run-Punkte unabhängig vom vorherigen Bestwert.
+- **Kindgerechter Namensfilter:** Offensichtlich unangemessene Namen und typische Verschleierungen werden abgewiesen. Die zentrale serverseitige Sperrprüfung läuft auch bei direktem Supabase-Zugriff.
+- **Private Admin-Moderation:** Der Admin kann Online-Ergebnisse gezielt löschen, Namen sperren und Sperren wieder aufheben. Die Moderation ist mit dem weiterhin privaten Admin-Code geschützt. Normale Nutzer können weder Ergebnisse löschen noch die interne Sperrliste lesen.
+- **Shop und Münzen aus der Benutzeroberfläche entfernt.** Bereits gespeicherte Shop-Daten bleiben erhalten, werden aber nicht mehr angezeigt. Abzeichen und Erfolgsanimationen bleiben.
+- **Installierbare Web-App (PWA):** Manifest, App-Icon und Service Worker für zuverlässigeres Öffnen über den Home-Bildschirm. Die PWA speichert keine Supabase-Abfragen im Cache.
 
-Die ersten **20 Level pro Klassenstufe** bleiben vollständig erhalten. Danach öffnet sich die **Endless Challenge**: Ab Level 21 werden auf Grundlage der Klassenstufe und des erreichten Levels weitere Grammatikaufgaben erzeugt. Der Satzgenerator kombiniert verschiedene Aufgabenmuster und Begriffe, die Themen werden zunehmend anspruchsvoll. Es gibt kein festes letztes Level und kein Limit von 2.000 XP mehr.
+## Die vier Aufgabenarten
 
-**Die Bestenliste zeigt deinen persönlichen Rekord (Personal Best), nicht die Summe aller Durchläufe.**
+| Modus | Aufgabe |
+| --- | --- |
+| Word Order | Wörter in die richtige Reihenfolge setzen |
+| Multiple Choice | Den grammatikalisch korrekten Satz auswählen |
+| Fill the Gap | Die passende Wortform ergänzen |
+| Mixed Mode | Automatischer Wechsel zwischen den drei Modi |
 
-Beispiel:
+## Rekordbeispiel
 
-| Was du machst | Aktuelle Runde | Persönlicher Rekord |
+| Moment | Run | Persönlicher Rekord |
 | --- | ---: | ---: |
-| Erster Durchlauf bis Level 20 | 2.000 XP | 2.000 XP |
-| Neue Runde starten | 0 XP | 2.000 XP |
-| Zweiter Durchlauf bis Level 10 | 1.000 XP | 2.000 XP |
-| Zweiter Durchlauf bis Level 21 | 2.100 XP | **2.100 XP** |
+| Bestehende Bestleistung | 2.000 XP | 2.000 XP |
+| Derselbe Name startet neu | 0 XP | 2.000 XP |
+| Neuer Run schafft 1.900 XP | 1.900 XP | 2.000 XP |
+| Neuer Run schafft 2.100 XP | 2.100 XP | **2.100 XP** |
 
-Über **New run · keep best** kann man jederzeit mit 0 Punkten von vorn beginnen. Der alte Rekord bleibt sowohl in den lokalen gespeicherten Ergebnissen als auch in der Online-Bestenliste erhalten. Die öffentliche Bestenliste liest dafür eine spezielle Datenbankansicht aus, die für jeden Nicknamen und jede Klassenstufe nur dessen **höchsten jemals gemeldeten Wert** auswählt. Ein niedrigeres späteres Ergebnis überschreibt diesen Wert nicht. Auch der Admin-Modus kann die lokale Bestenliste nicht mehr über einen Löschknopf zurücksetzen.
+**Wichtig:** Ohne Spieleraccounts ist ein Nickname **kein Identitätsnachweis**. Zwei Personen dürfen denselben Namen nutzen und dessen Rekord verbessern. Ein einmal online gespeicherter Bestwert bleibt bei einem schlechteren Run bestehen, kann aber vom Admin bei Namensverstößen entfernt werden.
 
-**Hinweis:** Der lokale Rekord ist nur so dauerhaft wie die Browserdaten; bei gelöschten Browserdaten kann er lokal verschwinden. Bereits erfolgreich online gespeicherte Rekorde bleiben in der Supabase-Datenbank bestehen. Spielernamen sind derzeit nicht per Benutzerkonto geschützt – benutze daher einen Spitznamen.
+## Sicherheit und Datenschutz
 
-### Spielprinzip
+Die öffentlichen Bestenlisten enthalten nur Nickname, Klassenstufe, gemeldete XP, Fortschritt und Zeitstempel. Gib keine echten Vor- und Nachnamen oder persönlichen Daten als Spitznamen ein. Eine formelle datenschutzrechtliche Prüfung und schulgerechte Datenschutzhinweise müssen vor breiter öffentlicher Nutzung erfolgen.
 
-1. **Spielername:** Nicknamen eingeben und Klasse 8, 9 oder 10 wählen.
-2. **Klassischer Lernpfad:** Easy (6 Aufgaben), Medium (7 Aufgaben), Hard (7 Aufgaben).
-3. **Endlos-Modus:** Ab Level 21 immer neue, mit höherem Fortschritt anspruchsvollere Aufgaben.
-4. **Drei Aufgabentypen:** Word Order, Multiple Choice und Fill the Gap, einzeln oder gemischt auswählbar.
-5. **Deutsche Fehlererklärungen:** Bei falschen Antworten lassen sich passende Grammatik-Tipps anzeigen.
-6. **Runden und Rekorde:** Jede richtige Antwort bringt 100 XP. Wenn die Leben ausgehen oder du bewusst neu startest, beginnt der aktuelle Punktestand wieder bei 0; nur ein neuer Bestwert verbessert die Bestenliste.
+Der Namensfilter ist **regelbasiert**, kann Varianten übersehen oder harmlose Namen versehentlich ablehnen. Die Sperrliste ist nicht öffentlich einsehbar. Neue Moderationsaktionen erfolgen nur serverseitig. Bereits veröffentlichte problematische Namen werden nicht automatisch gelöscht; der Admin kann sie manuell entfernen.
 
-### Weitere Funktionen
+Es gibt **noch keine serverseitige Überprüfung jeder gelösten Grammatikaufgabe**. Die Online-Rangliste ist daher nicht fälschungssicher. Für schulische Lernmotivation ist das akzeptabel, für einen Wettbewerb mit Preisen wären stärkere Integritätskontrollen nötig.
 
-- Interaktive Level-Karte mit den 20 Anfangsleveln und einem dynamischen Ausschnitt der Endlos-Aufgaben
-- Münzen, Kosmetik-Shop, Avatare, Titel und Erfolge
-- Keine doppelten Shop-Münzen für bereits gutgeschriebene Levels beim Wiederholen
-- Lokale und Online-Bestenliste mit Podium und Klassenfiltern
-- Zusätzliche Wochenansicht für Scores der letzten sieben Tage
-- Anpassbares Design-Studio mit Lesbarkeitsschutz und **Ocean Splash** als Standard
-- Optionale Soundeffekte und Animationen, responsives Layout
-- Automatisch gespeicherte Fortschritte, Ausrüstung und Designwahl im Browser
+Beim Offline-Spielen kann nur die integrierte Grundliste geprüft werden; zentral gesperrte Namen werden spätestens bei einem erneuten Online-Upload von der Datenbank abgewiesen. Bei fehlendem Internet werden neue Scores nicht sofort online gespeichert.
 
-## Kompatibilität
+## Bestehende Daten erhalten
 
-- **Bestehende Spielstände bleiben erhalten.** Die alten Speicherbereiche `grammar-quest-v2` (Spielstände und Rekorde) und `grammar-quest-v5-extras` (Shop und Erfolge) bleiben bestehen.
-- Ein bereits abgeschlossenes Level 20 geht beim Fortsetzen in Level 21 über, ohne die bisherigen Punkte zu verlieren.
-- Ein neuer Durchlauf setzt **nur die aktuelle Runde**, niemals den lokalen Rekordeintrag zurück.
-- Frühere Online-Ergebnisse werden nicht gelöscht. Das Datenbank-Update erweitert vorhandene Zahlenfelder und fügt eine Ansicht für persönliche Rekorde hinzu.
-- Shop-Käufe und Münzen sind weiterhin **nur lokal** auf dem jeweiligen Gerät vorhanden und werden nicht online synchronisiert.
-- Admin-Punkte können unverändert in der **gleichen öffentlichen Rangliste** erscheinen; ein privater Admin-Code wird nur serverseitig geprüft.
+- Kein altes Online-Ergebnis wurde während der Migration gelöscht.
+- Die lokale Speicherstruktur `grammar-quest-v2` für Rekorde und `grammar-quest-v5-extras` für bereits erworbene Elemente bleibt kompatibel.
+- Der Moduspräferenz-Schlüssel `grammar-quest-v5-mode` bleibt bestehen.
+- Alte Runs werden bei neuer Namenseingabe nicht fortgesetzt; jeder neue Run beginnt bewusst bei 0 XP und 5 Leben.
+- Ein neuer Run verändert keine alte persönliche Bestleistung.
 
 ## Technik
 
-| Bereich | Technologie |
-| --- | --- |
-| Spiel | HTML, CSS, JavaScript |
-| Hosting | GitHub Pages |
-| Shared Leaderboard | Supabase (PostgreSQL) |
-| Admin-Prüfung | Supabase Edge Function mit privatem, RLS-geschütztem Prüfwert |
-| Lokaler Fortschritt | Browser-Local-Storage |
-| Endlos-Aufgaben | `v6-endless.js` – reproduzierbarer Generator aus Jahrgang und Levelindex |
+Das Spiel besteht weiter aus HTML/CSS/JavaScript auf GitHub Pages und einer Supabase-PostgreSQL-Datenbank für die gemeinsame Rangliste. Die Kern-Dateien von Version 5/6 bleiben erhalten. Neu hinzugefügt wurden:
 
-### Lokal testen
+- `v7.css` und `v7-ui.js` für die Touch-App-Oberfläche
+- `v7-admin.js` für das geschützte Moderationsmenü
+- `manifest.webmanifest`, `app-icon.svg`, `sw.js` für die installierbare Web-App
+- `migrations/grammar_quest_v7_moderation.sql` für den serverseitigen Namensfilter, die Sperrliste und das Admin-Protokoll
+- `migrations/grammar_quest_v7_security_hardening.sql` für gesperrte öffentliche Zugriffsrechte
+- Aktualisierte Supabase Edge Function `supabase/functions/grammar-admin-score/index.ts`
 
-1. Das GitHub-Repository als ZIP herunterladen und entpacken.
-2. `index.html` im Browser öffnen. Alle `v5-*.js`-, `v5.css`- und `v6-endless.js`-Dateien müssen im selben Verzeichnis liegen.
-3. Einen Testnamen und eine Klasse wählen und Aufgaben lösen; für einen schnellen Funktionstest im Browser-Entwicklerwerkzeug kann ein Teststand verwendet werden.
-4. Ab Level 21 erscheinen dynamisch generierte Aufgaben. Bei einem neuen Durchlauf startet der Run bei 0, der Rekord bleibt erhalten.
+### Bestehendes Supabase-Projekt aktualisieren
 
-### In Supabase einrichten
+Die beiden V7-Migrationen in der genannten Reihenfolge ausführen. Anschließend die aktualisierte `grammar-admin-score`-Edge-Function mit `verify_jwt = false` deployen. Sie prüft den privaten Admin-Code selbst und stellt die öffentliche, nur lesende Namensprüfung bereit. Keine Secrets in `config.js` oder das GitHub-Repository eintragen.
 
-**Neues Projekt:** `supabase-leaderboard.sql` im SQL Editor ausführen. Der Online-Admin-Modus benötigt zusätzlich die Edge Function unter `supabase/functions/grammar-admin-score/` sowie die private Passwort-Prüftabelle aus `migrations/private_admin_verifier.sql`. Der echte Admin-Code und sein Hash dürfen **niemals** ins Repository.
+Das bestehende `grammar_best_scores`-View bleibt die maßgebliche, mit RLS geschützte **Bestleistungen-Rangliste**. Die Nutzer müssen dafür keine Konten erstellen.
 
-**Bestehendes Projekt:** Die Migration `migrations/endless_personal_best.sql` anwenden. Sie erweitert die Score-/Level-/Streak-Felder auf `bigint`, lockert die 2.000-XP-Beschränkung für reguläre Punkte und erstellt die `grammar_best_scores`-Ansicht. Danach die aktualisierte Admin-Edge-Function bereitstellen. Bereits gespeicherte Datensätze bleiben erhalten.
+### Lokal starten
 
-Trage anschließend die Supabase-Projekt-URL und **ausschließlich den Publishable Key** in `config.js` ein. Niemals einen Secret- oder `service_role`-Schlüssel im Browser verwenden.
-
-### Fairness und Datenschutz
-
-Die öffentliche Bestenliste speichert Spitznamen, Klassenstufe, gemeldete Punkte, Fortschritt und Zeitstempel. Jeder mit demselben Nicknamen kann bisher Scores unter diesem Namen einreichen; echte Konten und eine serverseitige Prüfung gelöster Aufgaben sind noch nicht eingebaut. Die Rangliste ist daher als Lernwettbewerb gedacht, **nicht** als fälschungssicherer Wettkampf. Der Admin-Zugangscode wird zwar privat auf dem Server geprüft, die Browser-Spieloberfläche lässt sich technisch weiterhin manipulieren.
+Repository als ZIP herunterladen und alle Dateien in einem Verzeichnis belassen. `index.html` öffnen. Für Online-Funktionen benötigt die Browser-App eine Supabase-Konfiguration; GitHub Pages nutzt die öffentliche `config.js`.
 
 ---
 
-**Grammar Quest — Learn. Play. Beat your best.**
+**Grammar Quest 7 — Learn. Play. Beat your best.**
