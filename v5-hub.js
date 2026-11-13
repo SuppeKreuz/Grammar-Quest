@@ -24,7 +24,7 @@ const BADGES=[
  {id:'medium',name:'Pathfinder',art:'⚡',description:'Complete the Medium path in any grade.'},
  {id:'hard',name:'Grammar Master',art:'👑',description:'Complete the Hard path in any grade.'},
  {id:'perfect',name:'Perfect Run',art:'💎',description:'Finish a grade with all five lives.'},
- {id:'collector',name:'Collector',art:'🎒',description:'Own at least three shop items.'},
+ {id:'endless30',name:'Endless Explorer',art:'🌊',description:'Complete 30 levels in one run.'},
  {id:'triple',name:'Triple Crown',art:'🏅',description:'Finish grades 8, 9 and 10.'}
 ];
 let db={players:{}};
@@ -69,7 +69,7 @@ function syncRewards(announce){
   medium:counts.some(n=>n>=13),
   hard:counts.some(n=>n>=20),
   perfect:records.some(s=>completed(s)>=20&&s.lives===5),
-  collector:p.owned.length>=3,
+  endless30:records.some(st=>completed(st)>=30),
   triple:[8,9,10].every(g=>{const st=gradeState(g);return st&&!st.assisted&&completed(st)>=20;})
  };
  const newBadges=[];
