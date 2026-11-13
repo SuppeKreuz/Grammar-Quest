@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#edf7ff">
-<meta name="description" content="Grammar Quest — a playful English word-order game for grades 8, 9 and 10.">
-<title>Grammar Quest · English Word Order</title>
+<meta name="description" content="Grammar Quest 7 — a friendly English grammar challenge with endless levels, multiple modes and personal bests."><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Grammar Quest"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="app-icon.svg" type="image/svg+xml">
+<title>Grammar Quest 7 · Ocean Arcade Light</title>
 <style>
 :root{--ink:#18304c;--soft:#6f859a;--green:#3199e9;--greenDark:#2179bc;--greenPale:#e0f1ff;--purple:#8065cf;--orange:#ffa83c;--red:#ee6f73;--line:#c8e4f8;--bg:#edf7ff;--white:#fff;--shadow:0 14px 42px rgba(20,68,47,.075)}
 *{box-sizing:border-box}[hidden]{display:none!important}html{scroll-behavior:smooth}body{margin:0;min-width:320px;background:radial-gradient(ellipse 560px 360px at 88% 0%,#e7f4ff 0%,transparent 85%),radial-gradient(ellipse 440px 340px at 6% 6%,#e7f9e9 0%,transparent 80%),var(--bg);color:var(--ink);font-family:Nunito,ui-rounded,"Segoe UI",sans-serif;font-weight:700;line-height:1.4}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8169ed;outline-offset:3px}button:disabled{opacity:.46;cursor:not-allowed!important;transform:none!important}.wrap{width:min(1240px,calc(100% - 48px));margin:auto}
@@ -71,6 +71,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
 </style>
 <link rel="stylesheet" href="v5.css">
 <style>.v6-intro-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pb-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 10px;padding:10px 12px;border:2px solid var(--surface-line);border-radius:13px;background:var(--accent-pale);color:var(--primary-text);font-size:12px;font-weight:1000}.pb-summary strong{color:var(--accent-deep);white-space:nowrap}@media(max-width:640px){.v6-intro-actions{width:100%}.v6-intro-actions .btn{flex:1}}</style>
+<link rel="stylesheet" href="v7.css">
 </head>
 <body>
 <header class="top"><div class="wrap top-inner">
@@ -88,7 +89,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <div class="setup-progress-step" data-setup-indicator="2" role="listitem"><span class="setup-dot">3</span><span>Difficulty</span></div>
  </div>
  <section class="setup-card panel" id="setupPage0" data-setup-page="0" aria-labelledby="setupNameHeading">
-  <div class="setup-illustration" aria-hidden="true">👋</div><span class="setup-kicker">STEP 1 OF 3 · PLAYER</span><h2 id="setupNameHeading">What's your name?</h2><p>Choose a nickname for your progress and leaderboard scores.</p>
+  <div class="setup-illustration" aria-hidden="true">👋</div><span class="setup-kicker">STEP 1 OF 3 · PLAYER</span><h2 id="setupNameHeading">What's your name?</h2><p>Choose a friendly nickname. Each player starts at 0 XP; only the best score stays.</p>
   <form id="setupNameForm" novalidate>
    <label class="form-field" for="setupNameInput">Player name</label>
    <input id="setupNameInput" class="text-input setup-text-input" maxlength="20" autocomplete="nickname" placeholder="Your nickname" required>
@@ -112,7 +113,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
   <div class="setup-stage-note" id="setupStageNote" role="status"></div>
   <div class="setup-actions"><button id="setupBackToGrade" class="btn light" type="button">← Back</button><button id="setupStart" class="btn green setup-next" type="button">Start playing →</button></div>
  </section>
- <div class="setup-footer"><span>✦</span> Your progress is saved on this device · <button type="button" id="setupRules">Grammatikregeln ansehen</button></div>
+ <div class="setup-footer"><span>✦</span> Your personal best is saved, and each name starts a fresh run · <button type="button" id="setupRules">Grammatikregeln ansehen</button></div>
 </section>
 <div id="playView" hidden>
 <section class="play-intro"><div><span class="eyebrow">✦ LET'S PRACTISE!</span><h1>You're on your way, <span id="playPlayer">player</span>!</h1><p id="playJourney">Grade 8 · Easy path</p></div><div class="v6-intro-actions"><button id="startNewRun" type="button" class="btn light">↻ New run · keep best</button><button id="changeChoices" type="button" class="btn light">↶ Change choices</button></div></section>
@@ -139,7 +140,7 @@ body[data-motion="off"] *,body[data-motion="off"] *::before,body[data-motion="of
    <div class="feedback" role="status" id="feedback"><span class="feedback-symbol">✓</span><span class="feedback-text"></span></div>
   </article></div>
   <aside class="right" aria-label="Game information">
-   <section class="panel stats"><div class="cardhead"><h3>⚡ Your stats</h3><small id="statsGrade">GRADE 8</small></div><div class="stats-grid"><div class="stat"><span>Current run</span><strong class="gold" id="scoreValue">0</strong></div><div class="stat"><span>Lives</span><strong class="heart" id="livesValue">♥♥♥</strong></div><div class="stat"><span>Streak</span><strong class="fire" id="streakValue">0</strong></div></div><div class="pb-summary"><span>🏆 Personal best</span><strong id="personalBestValue">0 XP</strong></div><div class="mini-progress"><span>YOUR LEARNING PATH</span><strong id="percentValue">0% complete</strong></div><div class="level-dots" id="levelDots" aria-label="Level map"></div></section>
+   <section class="panel stats"><div class="cardhead"><h3>⚡ Your stats</h3><small id="statsGrade">GRADE 8</small></div><div class="stats-grid"><div class="stat"><span>Current run</span><strong class="gold" id="scoreValue">0</strong></div><div class="stat"><span>Lives</span><strong class="heart" id="livesValue">♥♥♥♥♥</strong></div><div class="stat"><span>Streak</span><strong class="fire" id="streakValue">0</strong></div></div><div class="pb-summary"><span>🏆 Personal best</span><strong id="personalBestValue">0 XP</strong></div><div class="mini-progress"><span>YOUR LEARNING PATH</span><strong id="percentValue">0% complete</strong></div><div class="level-dots" id="levelDots" aria-label="Level map"></div></section>
    <section class="panel leadercard"><div class="leader-top"><div class="cardhead"><h3>🏆 Top players</h3><small id="leaderGrade">GRADE 8</small></div><p id="leaderScopeText">This browser · Grade 8</p></div><div class="leaderboard" id="miniLeaderboard"></div><div class="leader-actions"><button class="tiny active" type="button" id="localButton">Local</button><button class="tiny" type="button" id="onlineButton" hidden>Online</button><button class="tiny rightmost" type="button" id="fullBoardButton">View all →</button></div></section>
    <section class="panel tipcard"><div class="tip-top"><span class="tipicon">💡</span><div><h3>Dein Tipp</h3><small>GRAMMATIK-HILFE</small></div></div><p id="tipDescription"></p><code id="tipExample"></code></section>
   </aside>
@@ -675,5 +676,7 @@ readStore();store.name='';applyTheme();renderSettings();resetTiles();enterSetup(
 <script src="v5-game.js"></script>
 <script src="v5-hub.js"></script>
 <script src="v5-weekly.js"></script>
+<script src="v7-admin.js"></script>
+<script src="v7-ui.js"></script>
 </body>
 </html>
