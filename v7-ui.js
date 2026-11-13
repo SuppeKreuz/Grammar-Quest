@@ -74,4 +74,7 @@ watch.observe(setup,{attributes:true,attributeFilter:['hidden']});
 $('leaderDialog')?.addEventListener('close',()=>{bottom.querySelector('[data-v7-tab="home"]')?.click();});
 $('v5MapDialog')?.addEventListener('close',()=>{bottom.querySelector('[data-v7-tab="home"]')?.classList.add('active');bottom.querySelector('[data-v7-tab="levels"]')?.classList.remove('active');});
 syncPage();
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+ navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(err=>console.warn('App shell unavailable:',err));
+}
 })();
