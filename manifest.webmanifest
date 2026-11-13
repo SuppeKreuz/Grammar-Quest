@@ -1,0 +1,20 @@
+{
+  "id": "/Grammar-Quest/",
+  "name": "Grammar Quest – Ocean Arcade",
+  "short_name": "Grammar Quest",
+  "description": "English grammar challenges with endless levels and personal bests.",
+  "start_url": "/Grammar-Quest/",
+  "scope": "/Grammar-Quest/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#edf7ff",
+  "theme_color": "#3199e9",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
