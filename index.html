@@ -256,7 +256,7 @@ const RULES={
 ]};
 const $=id=>document.getElementById(id);
 const STORAGE='grammar-quest-v2';
-const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0});
+const freshState=()=>({level:0,score:0,lives:5,streak:0,bestStreak:0,solved:false,mistakes:0,mistakeLevel:0,mistakeMode:'order',lastWrong:null,startBest:0,runId:Date.now()+Math.random()});
 let store={name:'',grade:8,profiles:{},records:{},sound:true,motion:true,designMode:'presets',preset:'ocean',custom:{accent:'#6d83f2',bg:'#f4f5ff',surface:'#ffffff',ink:'#252a4c',radius:24,font:'rounded',pattern:'glow'}};
 let selection=[],tileOrder=[],feedback=null,adminUnlocked=false,adminOnlinePassphrase='',leaderMode='local',boardGrade=8,rulesGrade=8,onlineRows=[],leaderLoading=false,toastTimer=null,brandClicks=0;
 const remoteReady=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ONLINE_CONFIG.url) && ONLINE_CONFIG.anonKey);
@@ -320,7 +320,7 @@ function renderGame(){if(!store.name)return;const st=game(),topic=TOPICS[lesson(
  document.querySelectorAll('[data-grade]').forEach(btn=>btn.setAttribute('aria-selected',String(+btn.dataset.grade===store.grade)));
  const stage=STAGE_BOUNDS[stageIndex(st.level)];$('levelBadge').textContent=st.level>=20?`∞ ENDLESS · LEVEL ${(st.level+1).toLocaleString('en-US')}`:`${stage.name.toUpperCase()} · LEVEL ${st.level-stage.start+1} / ${stage.end-stage.start+1}`;$('topicBadge').textContent=topic.name.toUpperCase();$('levelTitle').textContent=topic.name;
  $('progressText').textContent=st.level>=20?`∞ Endless · Challenge ${(st.level+1).toLocaleString('en-US')}`:`${complete} / ${count} levels`;$('progressFill').style.width=`${Math.min(100,complete/count*100)}%`;$('progressTrack').setAttribute('aria-valuenow',Math.min(20,complete));
- $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=(store.records[`${store.grade}:${playerKey()}`]?.score||st.score).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(st.lives)+'♡'.repeat(3-st.lives);$('streakValue').textContent=st.streak;
+ $('scoreValue').textContent=st.score.toLocaleString('en-US');$('personalBestValue').textContent=(store.records[`${store.grade}:${playerKey()}`]?.score||st.score).toLocaleString('en-US')+' XP';$('livesValue').textContent='♥'.repeat(Math.max(0,Math.min(5,st.lives)))+'♡'.repeat(Math.max(0,5-st.lives));$('streakValue').textContent=st.streak;
  $('statsGrade').textContent=`GRADE ${store.grade}`;$('percentValue').textContent=st.level>=20?'∞ Endless Challenge — keep climbing!':`${Math.round(complete/count*100)}% complete`;
  $('wordsRemaining').textContent=`${tokens().length-selection.length} words left`;
  $('tipDescription').textContent=topic.tip;$('tipExample').textContent=topic.example;
@@ -339,7 +339,7 @@ function renderLeaderboard(){if(!store.name)return;const rows=getRows(store.grad
 function renderFullBoard(){const board=$('fullLeaderboard');board.replaceChildren();document.querySelectorAll('[data-boardgrade]').forEach(b=>b.classList.toggle('active',+b.dataset.boardgrade===boardGrade));const rows=getRows(boardGrade);$('leaderDialogScope').textContent=`${leaderMode==='online'?'Online leaderboard':'Scores on this device'} · Grade ${boardGrade}`;$('onlineInfo').textContent=remoteReady?'Online scores are shared across devices. Player names are public; please use a nickname.':'Scores are saved only in this browser. Set up the optional database to enable a shared online leaderboard.';$('submitOnline').hidden=!remoteReady;if(!rows.length){const p=document.createElement('p');p.className='leader-empty';p.textContent='No scores yet. Start a challenge!';board.appendChild(p);}else rows.slice(0,100).forEach((row,i)=>board.appendChild(rankNode(row,i)));}
 function renderAll(){if(!store.name)return;$('profileName').textContent=store.name;$('avatar').textContent=store.name[0].toUpperCase();$('soundToggle').textContent=store.sound?'♫':'♪̸';$('soundToggle').title=store.sound?'Turn sounds off':'Turn sounds on';$('soundToggle').setAttribute('aria-pressed',String(store.sound));renderGame();renderLeaderboard();}
 function openResult(win){if($('resultDialog').open)return;const st=game();$('resultBadge').textContent=win?'★':'♡';$('resultBadge').style.background=win?'#e5f9e7':'#fff2ef';$('resultBadge').style.color=win?'#3db768':'#e78283';$('resultEyebrow').textContent=win?'YOU DID IT!':'KEEP GOING!';$('resultHeading').textContent=win?`Grade ${store.grade} complete!`:'Out of lives!';$('resultCopy').textContent=win?`You mastered Easy, Medium and Hard — all 20 Grade ${store.grade} challenges!` :'This run is over. Your personal best stays saved in the leaderboard — start again and beat it!';$('resultScore').textContent=st.score.toLocaleString('en-US');$('resultDialog').showModal();if(remoteReady)postRemoteScore(true).catch(console.warn);}
-function restartGrade(){store.profiles[playerKey()][store.grade]=freshState();persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
+function restartGrade(){const rec=store.records[`${store.grade}:${playerKey()}`];const online=onlineRows.filter(r=>+r.grade===store.grade&&String(r.name||r.player_name).toLocaleLowerCase('en-US')===playerKey()).reduce((n,r)=>Math.max(n,Number(r.score)||0),0);store.profiles[playerKey()][store.grade]={...freshState(),startBest:Math.max(Number(rec?.score)||0,online)};persist();closeDialog('resultDialog');resetTiles();renderAll();window.scrollTo({top:0,behavior:'smooth'});}
 function pointFloat(){if(!motionAllowed())return;const el=document.createElement('span');el.className='float-point';el.textContent='+100 XP';$('gameCard').appendChild(el);setTimeout(()=>el.remove(),1250);}
 function confetti(amount=65){if(!motionAllowed())return;const colors=['#4bc575','#8f73d9','#ffbb4e','#6bbcf0','#ef7c91'];for(let i=0;i<amount;i++){const el=document.createElement('span');el.className='confetti';el.style.left=`${Math.random()*100}vw`;el.style.background=colors[i%colors.length];el.style.animationDelay=`${Math.random()*.6}s`;el.style.setProperty('--dur',`${2.5+Math.random()*1.8}s`);el.style.setProperty('--dx',`${Math.random()*250-125}px`);el.style.setProperty('--rot',`${Math.random()*900-450}deg`);document.body.appendChild(el);setTimeout(()=>el.remove(),5100);}}
 function toast(text){const el=$('toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2500);}
@@ -496,13 +496,13 @@ function changeCustom(key,value){store.custom[key]=value;store.designMode='custo
 let setupStep=0,draftName='',draftGrade=null,draftStage=0;
 function draftProgress(){
  const key=String(draftName).toLocaleLowerCase('en-US').trim();
- const st=store.profiles?.[key]?.[draftGrade]||freshState();
+ const st=freshState(); // Nickname entry always starts a new run; existing records are never reset.
  const count=Math.min(20,st.level+(st.solved?1:0));
  const active=Math.min(2,stageIndex(Math.min(19,count)));
  return {st,count,active};
 }
 function enterSetup(step=0){
- draftName=store.name||'';draftGrade=store.name?store.grade:null;
+ draftName=step===0?'':store.name||'';draftGrade=step===0?null:(store.name?store.grade:null);
  draftStage=0;$('setupNameInput').value=draftName;$('setupNameError').textContent='';
  closeDialog('resultDialog');closeDialog('stageDialog');
  $('playView').hidden=true;$('setupView').hidden=false;
@@ -553,17 +553,17 @@ function renderSetupStages(){
 function startFromSetup(){
  if(!draftName||!draftGrade)return;
  const {st,count,active}=draftProgress();
- if(st.lives<=0){
-  if(!confirm('Start a new run with 0 XP? Your personal best will stay on the leaderboard.'))return;
-  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()]??={};
-  store.profiles[String(draftName).toLocaleLowerCase('en-US').trim()][draftGrade]=freshState();
- }
+ const key=String(draftName).toLocaleLowerCase('en-US').trim();
+ store.profiles[key]??={};
+ const localBest=Number(store.records[`${draftGrade}:${key}`]?.score)||0;
+ const onlineBest=onlineRows.filter(r=>+r.grade===draftGrade&&String(r.name||r.player_name).toLocaleLowerCase('en-US')===key).reduce((n,r)=>Math.max(n,Number(r.score)||0),0);
+ store.profiles[key][draftGrade]={...freshState(),startBest:Math.max(localBest,onlineBest)};
  store.name=draftName;store.grade=draftGrade;boardGrade=draftGrade;rulesGrade=draftGrade;leaderMode=remoteReady?'online':'local';
  ensureProfile();
  // Show saved admin scores in the local leaderboard after re-entering the game.
  // Admin-assisted scores now appear on the shared online board after publishing.
  // A solved final level of an earlier stage is carried forward into the next stage.
- const current=game();if(current.solved&&current.lives>0){current.level++;current.solved=false;}
+ const current=game(); // A new nickname entry never resumes another child's session.
  persist();resetTiles();renderAll();
  $('setupView').hidden=true;$('playView').hidden=false;
  $('playPlayer').textContent=store.name;
@@ -641,7 +641,7 @@ $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){$('adminLo
 document.querySelectorAll('[data-admin]').forEach(b=>b.addEventListener('click',()=>adminAction(b.dataset.admin)));
 $('brandButton').addEventListener('click',()=>{brandClicks++;if(brandClicks>=7){brandClicks=0;openAdmin();}});
 document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();openAdmin();return;}if([...document.querySelectorAll('dialog')].some(d=>d.open)||$('playView').hidden)return;if(e.target instanceof HTMLElement&&['INPUT','TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName))return;if(e.key==='Backspace'){e.preventDefault();undo();}if(e.key==='Enter'){e.preventDefault();tryCheck();}});
-readStore();applyTheme();renderSettings();ensureProfile();resetTiles();if(store.name)renderAll();enterSetup(0);
+readStore();store.name='';applyTheme();renderSettings();resetTiles();enterSetup(0);
 </script>
 <script src="v5-design.js"></script>
 <script src="v5-game.js"></script>
