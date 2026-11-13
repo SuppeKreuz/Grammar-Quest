@@ -281,11 +281,11 @@ function quickNicknameCheck(name){
 }
 async function nicknameAllowed(name){
  if(!quickNicknameCheck(name))return false;
- if(!remoteReady)return true;
- const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/rest/v1/rpc/grammar_name_allowed';
- const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({input_name:name})});
+ if(!remoteReady||!navigator.onLine)return true; // Offline practice still enforces the local basic list.
+ const url=ONLINE_CONFIG.url.replace(/\/$/,'')+'/functions/v1/grammar-admin-score';
+ const response=await fetch(url,{method:'POST',headers:{apikey:ONLINE_CONFIG.anonKey,'Content-Type':'application/json'},body:JSON.stringify({action:'check-name',input_name:name})});
  if(!response.ok)throw new Error('Name check failed: '+response.status);
- return (await response.json())===true;
+ return (await response.json()).allowed===true;
 }
 function setName(name){store.name=name;ensureProfile();persist();resetTiles();renderAll();}
 function profileDialog(force=false){$('profileError').textContent='';$('nameInput').value=store.name;$('profileClose').hidden=force;$('profileDialog').dataset.force=String(force);$('profileDialog').showModal();setTimeout(()=>$('nameInput').focus(),20);}
