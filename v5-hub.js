@@ -23,7 +23,7 @@ const BADGES=[
  {id:'easy',name:'Easy Explorer',art:'🌱',description:'Complete the Easy path in any grade.'},
  {id:'medium',name:'Pathfinder',art:'⚡',description:'Complete the Medium path in any grade.'},
  {id:'hard',name:'Grammar Master',art:'👑',description:'Complete the Hard path in any grade.'},
- {id:'perfect',name:'Perfect Run',art:'💎',description:'Finish a grade with all three lives.'},
+ {id:'perfect',name:'Perfect Run',art:'💎',description:'Finish a grade with all five lives.'},
  {id:'collector',name:'Collector',art:'🎒',description:'Own at least three shop items.'},
  {id:'triple',name:'Triple Crown',art:'🏅',description:'Finish grades 8, 9 and 10.'}
 ];
@@ -68,7 +68,7 @@ function syncRewards(announce){
   easy:counts.some(n=>n>=6),
   medium:counts.some(n=>n>=13),
   hard:counts.some(n=>n>=20),
-  perfect:records.some(s=>completed(s)>=20&&s.lives===3),
+  perfect:records.some(s=>completed(s)>=20&&s.lives===5),
   collector:p.owned.length>=3,
   triple:[8,9,10].every(g=>{const st=gradeState(g);return st&&!st.assisted&&completed(st)>=20;})
  };
@@ -98,14 +98,14 @@ function openDialog(d){
  syncRewards(false);if(!d.open)d.showModal();
 }
 const mapDialog=createDialog('v5MapDialog','Your adventure map','20 classic levels plus endless grammar challenges');
-const shopDialog=createDialog('v5ShopDialog','Reward shop','Earn coins by completing new levels. Cosmetics do not change scores.');
+const shopDialog=null; // Old cosmetics remain in storage but the shop is removed.
 const badgeDialog=createDialog('v5BadgeDialog','Achievements & badges','Your personal collection of grammar milestones.');
 const toolbar=document.createElement('div');toolbar.className='v5-toolbar';toolbar.id='v5Toolbar';
 function barButton(label,action){
  const b=document.createElement('button');b.type='button';b.className='v5-toolbar-button';b.textContent=label;b.addEventListener('click',action);toolbar.appendChild(b);return b;
 }
 barButton('🗺️ Level map',()=>{drawMap();openDialog(mapDialog);});
-barButton('🛍️ Shop',()=>{drawShop();openDialog(shopDialog);});
+// Shop removed from toolbar in version 7.
 barButton('🏅 Badges',()=>{drawBadges();openDialog(badgeDialog);});
 const modeSelect=document.createElement('select');
 modeSelect.className='v5-toolbar-button';modeSelect.setAttribute('aria-label','Challenge mode');
@@ -115,8 +115,7 @@ for(const [value,text] of [['mixed','🎲 Mixed modes'],['order','🧩 Word orde
 modeSelect.value=window.GrammarQuestModes?.get()||'mixed';
 modeSelect.addEventListener('change',()=>{window.GrammarQuestModes?.set(modeSelect.value);toast('Challenge mode changed. Your progress is safe.');});
 toolbar.appendChild(modeSelect);
-const walletButton=barButton('🪙 0',()=>{drawShop();openDialog(shopDialog);});
-walletButton.classList.add('v5-wallet');
+const walletButton=document.createElement('span'); // Hidden compatibility placeholder.
 const intro=$h('playView')?.querySelector('.play-intro');
 if(intro)intro.after(toolbar);
 const preview=document.createElement('section');preview.className='v5-map-preview';preview.id='v5MapPreview';
@@ -153,7 +152,7 @@ function drawMap(){
  if(!store.name)return;
  const st=game(),progress=completed(st);
  const stats=document.createElement('div');stats.className='v5-map-stats';
- for(const value of ['🎓 Grade '+store.grade,'✅ '+(progress>=20?`${progress.toLocaleString('en-US')} challenges (∞ Endless)`:`${progress} / 20 classic levels`),'🪙 '+coinsText()+' coins']){
+ for(const value of ['🎓 Grade '+store.grade,'✅ '+(progress>=20?`${progress.toLocaleString('en-US')} challenges (∞ Endless)`:`${progress} / 20 classic levels`),'🏆 '+personalBestScore().toLocaleString('en-US')+' XP best']){
   const chip=document.createElement('span');chip.className='v5-chip';chip.textContent=value;stats.appendChild(chip);
  }
  body.appendChild(stats);
@@ -243,7 +242,7 @@ function drawShop(){
 function drawBadges(){
  const body=$h('v5BadgeDialogBody');body.replaceChildren();
  const p=wallet();if(!p)return;
- const text=document.createElement('p');text.className='v5-ranking-context';text.textContent='Unlocked '+p.badges.length+' of '+BADGES.length+' badges · Earned badges stay with your player profile in this browser.';
+ const text=document.createElement('p');text.className='v5-ranking-context';text.textContent='Unlocked '+p.badges.length+' of '+BADGES.length+' badges · Badges stay saved on this tablet; no account required.';
  const grid=document.createElement('div');grid.className='v5-badges-grid';
  for(const badge of BADGES){
   const unlocked=p.badges.includes(badge.id);
@@ -257,16 +256,9 @@ function drawBadges(){
 }
 function refreshHud(){
  const p=wallet();if(!p)return;
- walletButton.textContent='🪙 '+coinsText();
- const item=SHOP.find(s=>s.id===p.equipped.avatar);
- const avatar=$h('avatar');if(avatar&&store.name)avatar.textContent=item?item.art:store.name.charAt(0).toUpperCase();
- let title=$h('v5PlayerTitle');
- if(!title&&intro){
-  title=document.createElement('small');title.id='v5PlayerTitle';title.className='v5-top-note';
-  intro.querySelector('p')?.after(title);
- }
- const label=SHOP.find(s=>s.id===p.equipped.title);
- if(title){title.textContent=label?label.art+' '+label.name+' · 🪙 '+coinsText()+' coins':'🪙 '+coinsText()+' coins';}
+ // No coin counter on the interface.
+ const avatar=$h('avatar');if(avatar&&store.name)avatar.textContent=store.name.charAt(0).toUpperCase();
+ const oldTitle=$h('v5PlayerTitle');if(oldTitle)oldTitle.remove();
  drawPreview();
  if(mapDialog.open)drawMap();
 }
@@ -276,8 +268,6 @@ correct=function(auto){
  baseCorrect(auto);
  if(!before&&st.solved&&!auto&&!st.assisted){
   syncRewards(false);refreshHud();
-  const gained=(p?.coins||0)-oldCoins;
-  if(gained>0)toast('+'+gained+' coins earned! 🪙');
   if((p?.badges.length||0)>oldBadges)window.setTimeout(()=>toast('New achievement unlocked! 🏅'),600);
  }
 };
